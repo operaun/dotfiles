@@ -1,0 +1,123 @@
+set nocompatible
+filetype off
+
+set history=1000
+set ruler
+set sc
+set number
+set tabstop=2
+set shiftwidth=2
+set expandtab
+set ls=2
+
+set nowrap
+set magic
+
+set sel=exclusive
+set mps+=<:>
+set sm
+set cursorline
+
+set hlsearch
+set nowrapscan
+set ignorecase
+set showmatch
+set fdm=marker
+
+set mouse=r
+
+"filetype plugin indent on
+"sy enable
+"filetype on
+if has("syntax")
+   syntax on
+endif
+
+set autoindent
+set cindent
+
+set wmnu
+set fdl=1
+"set fdc=3
+
+vmap <Tab> >gv
+vmap <S-Tab> <gv
+
+"""""""""""""" Mouse
+"set mouse=a
+"set ttymouse=xterm2
+
+"""""""""""""" Paste
+nnoremap <F8> :set invpaste paste?<CR>
+set pastetoggle=<F8>
+set showmode
+
+"""""""""""""" Wrap
+command! -nargs=* Wrap set wrap linebreak nolist
+
+"""""""""""""" Vundle
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+" let Vundle manage Vundle, required
+Plugin 'gmarik/Vundle.vim'
+
+Plugin 'vim-airline/vim-airline'
+Plugin 'The-NERD-tree'
+Plugin 'AutoComplPop'
+Plugin 'SuperTab'
+Plugin 'delimitMate.vim'
+Plugin 'matchit.zip'
+Plugin 'unimpaired.vim'
+Plugin 'surround.vim'
+Plugin 'Syntastic'
+Plugin 'python.vim'
+Plugin 'a.vim'
+Plugin 'vim-startify'
+
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+filetype plugin indent on    " required
+
+"""""""""""""" Color scheme
+if &term =~ "xterm"
+  let &t_Co=256  "256 color --
+  " restore screen after quitting
+  set t_ti=ESC7ESC[rESC[?47h t_te=ESC[?47lESC8
+  if has("terminfo")
+    let &t_Sf="\ESC[3%p1%dm"
+    let &t_Sb="\ESC[4%p1%dm"
+  else
+    let &t_Sf="\ESC[3%dm"
+    let &t_Sb="\ESC[4%dm"
+  endif
+  color jellybeans
+elseif &term =~ "screen"
+  set ttytype=xterm
+  let &t_Co=256  "256 color --
+  " restore screen after quitting
+  set t_ti=ESC7ESC[rESC[?47h t_te=ESC[?47lESC8
+  if has("terminfo")
+    let &t_Sf="\ESC[3%p1%dm"
+    let &t_Sb="\ESC[4%p1%dm"
+  else
+    let &t_Sf="\ESC[3%dm"
+    let &t_Sb="\ESC[4%dm"
+  endif
+  color jellybeans
+endif
+
+"""""""""""""" matchit
+:source ~/.vim/bundle/matchit.zip/plugin/matchit.vim
+
+"""""""""""""" Alternate
+nmap <F2> :A<CR>
+
+"""""""""""""" startify
+let g:startify_custom_header = [
+                \ ' ______________________________________ ',
+                \ '( Almost every programming language is )',
+                \ '( overrated by its practitioners. --   )',
+                \ '( Larry Wall                           )',
+                \ ' ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ ',
+                \ ]
