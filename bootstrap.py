@@ -16,5 +16,5 @@ if __name__ == "__main__":
 #    printColors()
     manager = DotSystemManager(platform.system(), True)
     manager.installPackages(PACKAGE_LIST)
-#    manager.installCustoms() # On going work
+    manager.installCustoms() # Vundle, Prezto
     manager.makeSymlinks()

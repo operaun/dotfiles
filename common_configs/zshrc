@@ -11,3 +11,10 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
 fi
 
 # Customize to your needs...
+export PAGER='less'
+export EDITOR='vim'
+export USE_EDITOR=$EDITOR
+export VISUAL=$EDITOR
+
+alias tmux='tmux -2'
+alias cd='cdls'

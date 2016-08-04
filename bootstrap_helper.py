@@ -3,6 +3,19 @@
 import os
 import subprocess
 
+class CustomPackageManager:
+    def installPrezto(self):
+        os.system('git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"')
+        os.system("chsh -s /usr/bin/zsh")
+
+    def installVimAddOn(self):
+        os.system("mkdir -p ~/.vim/colors")
+        os.system("cp ./custom_files/jellybeans.vim ~/.vim/colors/")
+
+        os.system("mkdir -p ~/.vim/bundle")
+        os.system("git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim")
+        os.system("vim +PluginInstall +qall")
+
 class DotSystemManager:
     # Several functionalities are not arranged yet
     # installPackages
@@ -42,15 +55,15 @@ class DotSystemManager:
             printWarning("Do not do it")
             return
 
-#        for package in package_list:
-#            self.installPackage(package)
+        for package in package_list:
+            self.installPackage(package)
         printDefault("")
 
     def installCustoms(self):
         printGreen("--| Install custom programs from -- ")
-        printDefault("Vundle") # ack
-        printDefault("sack")
-        printDefault("prezto") # for zsh
+        custom_package_manager = CustomPackageManager()
+        custom_package_manager.installPrezto()
+        custom_package_manager.installVimAddOn()
 
     def makeSymlinkWith(self, config_file, config_dir):
         source_path = "%s/%s" % (config_dir, config_file)

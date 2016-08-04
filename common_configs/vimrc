@@ -74,6 +74,7 @@ Plugin 'Syntastic'
 Plugin 'python.vim'
 Plugin 'a.vim'
 Plugin 'vim-startify'
+Plugin 'mileszs/ack.vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -112,6 +113,9 @@ endif
 
 """""""""""""" Alternate
 nmap <F2> :A<CR>
+
+"""""""""""""" Ack
+let g:ackprg = 'ag --nogroup --nocolor --column'
 
 """""""""""""" startify
 let g:startify_custom_header = [

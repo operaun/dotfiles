@@ -36,6 +36,7 @@ zstyle ':prezto:load' pmodule \
 #  'editor' \
 #  'history' \
 #  'spectrum' \
+#  'tmux' \
 
 #
 # Autosuggestions
@@ -134,7 +135,7 @@ zstyle ':prezto:module:prompt' theme 'minimal'
 #   'line' \
 #   'cursor' \
 #   'root'
-#
+
 # Set syntax highlighting styles.
 # zstyle ':prezto:module:syntax-highlighting' styles \
 #   'builtin' 'bg=blue' \

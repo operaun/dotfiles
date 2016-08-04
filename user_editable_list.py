@@ -5,5 +5,7 @@ vim
 zsh
 tmux
 git
-ag
+silversearcher-ag
 '''
+
+# silversearcher-ag, the_silver_searcher
