@@ -4,17 +4,22 @@ import os
 import subprocess
 
 class CustomPackageManager:
-    def installPrezto(self):
-        os.system('git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"')
-        os.system("chsh -s /usr/bin/zsh")
+    def installDefaultZsh(self):
+        zsh_file_path = readStringFromCmd("which zsh")
+        if (zsh_file_path == False):
+            printHeader("Can not find zsh installation")
+        printHeader("Your new default shell path($SHELL): %s" % zsh_file_path)
+        os.system("chsh -s %s" % zsh_file_path)
 
-    def installVimAddOn(self):
+    def installVimColor(self):
         os.system("mkdir -p ~/.vim/colors")
         os.system("cp ./custom_files/jellybeans.vim ~/.vim/colors/")
 
+    def installVundle(self):
         os.system("mkdir -p ~/.vim/bundle")
         os.system("git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim")
         os.system("vim +PluginInstall +qall")
+
 
 class DotSystemManager:
     # Several functionalities are not arranged yet
@@ -60,10 +65,17 @@ class DotSystemManager:
         printDefault("")
 
     def installCustoms(self):
-        printGreen("--| Install custom programs from -- ")
+        printGreen("\n--| Install custom programs from -- ")
+        printBlue("\t Jellybeans color: color for VIM")
+        printBlue("\t Vundle: plugin framework for VIM")
+        printBlue("\t Default Zsh: change $SHELL config")
+        if (self.confirmContinue() is False):
+            printWarning("Do not do it")
+            return
         custom_package_manager = CustomPackageManager()
-        custom_package_manager.installPrezto()
-        custom_package_manager.installVimAddOn()
+        custom_package_manager.installVimColor()
+        custom_package_manager.installVundle()
+        custom_package_manager.installDefaultZsh()
 
     def makeSymlinkWith(self, config_file, config_dir):
         source_path = "%s/%s" % (config_dir, config_file)
@@ -77,7 +89,7 @@ class DotSystemManager:
         if (len(config_files) == 0): # if config_dir is empty, just return
             return
 
-        printGreen("--| Try to make symbolic links from %s" % config_dir)
+        printGreen("\n--| Try to make symbolic links from %s" % config_dir)
         for config_file in config_files:
             printBlue("\t " + config_file)
 
@@ -90,10 +102,10 @@ class DotSystemManager:
 
     def makeSymlinks(self):
         self.makeSymlinksFromDir(os.path.abspath("./common_configs"))
-        if self.OS == "Linux": # Ubuntu
-            self.makeSymlinksFromDir(os.path.abspath("./linux_configs"))
-        elif self.OS == "FreeBSD":
-            self.makeSymlinksFromDir(os.path.abspath("./bsd_configs"))
+#        if self.OS == "Linux": # Ubuntu
+#            self.makeSymlinksFromDir(os.path.abspath("./linux_configs"))
+#        elif self.OS == "FreeBSD":
+#            self.makeSymlinksFromDir(os.path.abspath("./bsd_configs"))
 
 
 class bcolors:
@@ -129,3 +141,10 @@ def printFail(string):
 
 def printDefault(string):
     print(string)
+
+
+def readStringFromCmd(cmd):
+    ret_string = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).stdout.readline()
+    if len(ret_string) == 0:
+        return False
+    return ret_string

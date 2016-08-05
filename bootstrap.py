@@ -3,7 +3,9 @@
 import sys; sys.dont_write_bytecode = True
 import platform
 from bootstrap_helper import *
-from user_editable_list import PACKAGE_LIST
+from user_editable_list import *
+
+import subprocess
 
 def printColors():
     printHeader("Header?")
@@ -14,7 +16,11 @@ def printColors():
 
 if __name__ == "__main__":
 #    printColors()
-    manager = DotSystemManager(platform.system(), True)
-    manager.installPackages(PACKAGE_LIST)
+    current_system = platform.system()
+    manager = DotSystemManager(current_system, False)
+    if current_system == "Linux": # Ubuntu
+        manager.installPackages(UBUNTU_PACKAGE_LIST)
+    elif current_system == "FreeBSD":
+        manager.installPackages(FREEBSD_PACAKAGE_LIST)
     manager.installCustoms() # Vundle, Prezto
     manager.makeSymlinks()

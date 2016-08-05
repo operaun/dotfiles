@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-PACKAGE_LIST = '''\
+UBUNTU_PACKAGE_LIST = '''\
 vim
 zsh
 tmux
@@ -8,4 +8,10 @@ git
 silversearcher-ag
 '''
 
-# silversearcher-ag, the_silver_searcher
+FREEBSD_PACAKAGE_LIST = '''\
+vim-lite
+zsh
+tmux
+git
+the_silver_searcher
+'''

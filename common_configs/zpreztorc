@@ -26,10 +26,10 @@ zstyle ':prezto:*:*' color 'yes'
 zstyle ':prezto:load' pmodule \
   'directory' \
   'utility' \
-  'completion' \
   'git' \
   'prompt' \
   'environment' \
+  'completion' \
   'syntax-highlighting' \
   'history-substring-search' 
 #  'terminal' \
