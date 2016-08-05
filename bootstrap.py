@@ -22,5 +22,5 @@ if __name__ == "__main__":
         manager.installPackages(UBUNTU_PACKAGE_LIST)
     elif current_system == "FreeBSD":
         manager.installPackages(FREEBSD_PACAKAGE_LIST)
-    manager.installCustoms() # Vundle, Prezto
     manager.makeSymlinks()
+    manager.installCustoms() # Vundle, Prezto
