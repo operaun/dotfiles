@@ -21,7 +21,7 @@ class CustomPackageManager:
         os.system("vim +PluginInstall +qall")
 
 
-class DotSystemManager:
+class DotProcesser:
     # Several functionalities are not arranged yet
     # installPackages
     # installCustoms
@@ -100,8 +100,9 @@ class DotSystemManager:
         for config_file in config_files:
             self.makeSymlinkWith(config_file, config_dir)
 
-    def makeSymlinks(self):
-        self.makeSymlinksFromDir(os.path.abspath("./common_configs"))
+    def makeSymlinks(self, config_dir):
+#        self.makeSymlinksFromDir(os.path.abspath("./common_configs"))
+        self.makeSymlinksFromDir(os.path.abspath(config_dir))
 #        if self.OS == "Linux": # Ubuntu
 #            self.makeSymlinksFromDir(os.path.abspath("./linux_configs"))
 #        elif self.OS == "FreeBSD":

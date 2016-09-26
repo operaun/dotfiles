@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+IS_DISABLE_WARNING = False
+
 UBUNTU_PACKAGE_LIST = '''\
 vim
 zsh
