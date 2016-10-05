@@ -2,8 +2,9 @@
 
 import os
 import subprocess
+from pretty_printer import *
 
-class CustomPackageManager:
+class CustomPackageManager(object):
     def installDefaultZsh(self):
         zsh_file_path = readStringFromCmd("which zsh")
         if (zsh_file_path == False):
@@ -13,7 +14,7 @@ class CustomPackageManager:
 
     def installVimColor(self):
         os.system("mkdir -p ~/.vim/colors")
-        os.system("cp ./custom_files/jellybeans.vim ~/.vim/colors/")
+        os.system("cp ../custom_files/jellybeans.vim ~/.vim/colors/")
 
     def installVundle(self):
         os.system("mkdir -p ~/.vim/bundle")
@@ -21,18 +22,17 @@ class CustomPackageManager:
         os.system("vim +PluginInstall +qall")
 
 
-class DotProcesser:
+class DotProcesser(object):
     # Several functionalities are not arranged yet
     # installPackages
     # installCustoms
     # makeSymlinks
 
     def __init__(self, OS, disable_warning):
-        self.OS = OS
         self.disable_warning = disable_warning
         self.home_dir = os.path.expanduser('~')
 
-        printHeader("Your OS: %s" % self.OS)
+        printHeader("Your OS: %s" % OS)
         printHeader("Your home directory: %s" % self.home_dir)
         printHeader("Disable warning: %s" % disable_warning)
         printDefault("")
@@ -44,13 +44,11 @@ class DotProcesser:
             return True
         return False
 
-    def installPackage(self, package):
-        if self.OS == "Linux": # Ubuntu
-            subprocess.call(["sudo", "apt-get", "install", "-y", package])
-        elif self.OS == "FreeBSD":
-            subprocess.call(["pkg", "install", "-y", package])
+    def installPackage(self, package, cmd):
+        print cmd + " %s" % package
+        subprocess.call(cmd + " %s" % package, shell=True)
 
-    def installPackages(self, packages):
+    def installPackages(self, packages, cmd):
         printGreen("--| Try to install/update following packages")
         package_list = packages.splitlines()
         for package in package_list:
@@ -61,7 +59,7 @@ class DotProcesser:
             return
 
         for package in package_list:
-            self.installPackage(package)
+            self.installPackage(package, cmd)
         printDefault("")
 
     def installCustoms(self):
@@ -84,7 +82,8 @@ class DotProcesser:
 #            target_path = config_file.CustomPath()
         os.system( "ln -sfnv %s %s" % (source_path, target_path) )
 
-    def makeSymlinksFromDir(self, config_dir):
+    def makeSymlinks(self, config_dir):
+        config_dir = os.path.abspath(config_dir)
         config_files = os.listdir(config_dir)
         if (len(config_files) == 0): # if config_dir is empty, just return
             return
@@ -99,50 +98,6 @@ class DotProcesser:
 
         for config_file in config_files:
             self.makeSymlinkWith(config_file, config_dir)
-
-    def makeSymlinks(self, config_dir):
-#        self.makeSymlinksFromDir(os.path.abspath("./common_configs"))
-        self.makeSymlinksFromDir(os.path.abspath(config_dir))
-#        if self.OS == "Linux": # Ubuntu
-#            self.makeSymlinksFromDir(os.path.abspath("./linux_configs"))
-#        elif self.OS == "FreeBSD":
-#            self.makeSymlinksFromDir(os.path.abspath("./bsd_configs"))
-
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-
-    def disable(self):
-        self.HEADER = ''
-        self.OKBLUE = ''
-        self.OKGREEN = ''
-        self.WARNING = ''
-        self.FAIL = ''
-        self.ENDC = ''
-
-def printHeader(string):
-    print(bcolors.HEADER + string + bcolors.ENDC)
-
-def printBlue(string):
-    print(bcolors.OKBLUE + string + bcolors.ENDC)
-
-def printGreen(string):
-    print(bcolors.OKGREEN + string + bcolors.ENDC)
-
-def printWarning(string):
-    print(bcolors.WARNING + string + bcolors.ENDC)
-
-def printFail(string):
-    print(bcolors.FAIL + string + bcolors.ENDC)
-
-def printDefault(string):
-    print(string)
-
 
 def readStringFromCmd(cmd):
     ret_string = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).stdout.readline()
