@@ -5,8 +5,14 @@ import subprocess
 from pretty_printer import *
 
 class CustomPackageManager(object):
+    def __readStringFromCmd(self, cmd):
+        ret_string = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).stdout.readline()
+        if len(ret_string) == 0:
+            return False
+        return ret_string
+
     def installDefaultZsh(self):
-        zsh_file_path = readStringFromCmd("which zsh")
+        zsh_file_path = self.__readStringFromCmd("which zsh")
         if (zsh_file_path == False):
             printHeader("Can not find zsh installation")
         printHeader("Your new default shell path($SHELL): %s" % zsh_file_path)
@@ -98,9 +104,3 @@ class DotProcesser(object):
 
         for config_file in config_files:
             self.makeSymlinkWith(config_file, config_dir)
-
-def readStringFromCmd(cmd):
-    ret_string = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).stdout.readline()
-    if len(ret_string) == 0:
-        return False
-    return ret_string
