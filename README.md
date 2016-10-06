@@ -6,7 +6,7 @@ Dotfiles is a enviornment setter which helps someone like below
 
 Simplet way
 -----------------
-<pre><code>'./bootstrap.py -y'</code></pre>a
+<pre><code>'./bootstrap.py -y'</code></pre>
 Overview
 -----------------
 This dot files consists of three stages below
