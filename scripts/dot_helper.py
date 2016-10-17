@@ -2,31 +2,8 @@
 
 import os
 import subprocess
+import custom_task_manager
 from pretty_printer import *
-
-class CustomPackageManager(object):
-    def __readStringFromCmd(self, cmd):
-        ret_string = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).stdout.readline()
-        if len(ret_string) == 0:
-            return False
-        return ret_string
-
-    def installDefaultZsh(self):
-        zsh_file_path = self.__readStringFromCmd("which zsh")
-        if (zsh_file_path == False):
-            printHeader("Can not find zsh installation")
-        printHeader("Your new default shell path($SHELL): %s" % zsh_file_path)
-        os.system("chsh -s %s" % zsh_file_path)
-
-    def installVimColor(self):
-        os.system("mkdir -p ~/.vim/colors")
-        os.system("cp ../custom_files/jellybeans.vim ~/.vim/colors/")
-
-    def installVundle(self):
-        os.system("mkdir -p ~/.vim/bundle")
-        os.system("git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim")
-        os.system("vim +PluginInstall +qall")
-
 
 class DotProcesser(object):
     # Several functionalities are not arranged yet
@@ -69,17 +46,17 @@ class DotProcesser(object):
         printDefault("")
 
     def installCustoms(self):
+        task_manager = custom_task_manager.CustomTaskManager()
+        task_manager.addTask(custom_task_manager.VimColorTask())
+        task_manager.addTask(custom_task_manager.VimVundleTask())
+        task_manager.addTask(custom_task_manager.ZshTask())
+
         printGreen("\n--| Install custom programs from -- ")
-        printBlue("\t Jellybeans color: color for VIM")
-        printBlue("\t Vundle: plugin framework for VIM")
-        printBlue("\t Default Zsh: change $SHELL config")
+        task_manager.printMessages()
         if (self.confirmContinue() is False):
             printWarning("Do not do it")
             return
-        custom_package_manager = CustomPackageManager()
-        custom_package_manager.installVimColor()
-        custom_package_manager.installVundle()
-        custom_package_manager.installDefaultZsh()
+        task_manager.doWorks()
 
     def makeSymlinkWith(self, config_file, config_dir):
         source_path = "%s/%s" % (config_dir, config_file)
