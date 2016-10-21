@@ -62,3 +62,17 @@ class VimVundleTask(CustomTask):
         os.system("mkdir -p ~/.vim/bundle")
         os.system("git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim")
         os.system("vim +PluginInstall +qall")
+
+class GitConfigTask(CustomTask):
+    def printHelpMessage(self):
+        printBlue("\t Git: setting personal configuration for Git")
+
+    def doWork(self):
+        os.system('git config --global user.name "Jongmin Won"')
+        os.system('git config --global user.email "operaun@gmail.com"')
+        os.system('git config --global merge.tool vimdiff')
+        os.system('git config --global core.editor vim')
+        os.system('git config --global core.autocrlf false')
+        os.system('git config --global core.filemode false')
+        os.system('git config --global color.ui true')
+

@@ -50,6 +50,7 @@ class DotProcesser(object):
         task_manager.addTask(custom_task_manager.VimColorTask())
         task_manager.addTask(custom_task_manager.VimVundleTask())
         task_manager.addTask(custom_task_manager.ZshTask())
+        task_manager.addTask(custom_task_manager.GitConfigTask())
 
         printGreen("\n--| Install custom programs from -- ")
         task_manager.printMessages()
