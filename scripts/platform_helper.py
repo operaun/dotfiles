@@ -11,7 +11,7 @@ import user_editable
 class PlatformHelperFactory(object):
     def factory(OS):
         if OS == "Linux": return LinuxPlatformHelper()
-        elif OS == "FreeBSD": return FreeBSDPlatformHelper()
+        elif OS == "FreeBSD" or "TmaxOS": return FreeBSDPlatformHelper()
         assert 0, "Not supported OS classifiction: " + OS
     factory = staticmethod(factory)
 
@@ -52,7 +52,7 @@ class LinuxPlatformHelper(PlatformHelper):
 
 class FreeBSDPlatformHelper(PlatformHelper):
     def getPlatformName(self):
-        return "FreeBSd"
+        return "FreeBSD"
     def getPackageList(self):
         return user_editable.FREEBSD_PACAKAGE_LIST
     def getPlatformConfigDir(self):

@@ -18,5 +18,20 @@ export EDITOR='vim'
 export USE_EDITOR=$EDITOR
 export VISUAL=$EDITOR
 
+export PATH=/usr/local/libexec/ccache:$PATH
+export CCACHE_PATH=/usr/bin:/usr/local/bin
+export CCACHE_DIR=/var/tmp/ccache
+export CCACHE_LOGFILE=/var/log/ccache.log
+#export CCACHE_PREFIX="distcc"
+
+export JAVA_VERSION="1.8"
+export JAVA_OS="native"
+export PATH=${JAVA_HOME}/bin:${PATH}
+export SWT_GTK3=0
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/system/lib:/usr/local/lib
+
 alias tmux='tmux -2'
 alias cd='cdls'
+alias cdt='cd ~/browser/src'
+alias cdd='cd /usr/local/togate/Debug'
+alias cdk='cd /root/trunk/src'
