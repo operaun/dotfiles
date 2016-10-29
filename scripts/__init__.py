@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os;
 import sys; sys.dont_write_bytecode = True
@@ -6,7 +6,7 @@ import platform
 import argparse
 
 # comment(jongmin): if multi level subdirectory is required, consider below sys.path.insert
-#sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), 'scripts'))
+sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), 'scripts'))
 import platform_helper
 import dot_helper
 
@@ -31,11 +31,11 @@ def dot_main(args):
     processor.installCustoms() # Vundle, Prezt
 
 def main(args):
-#    try:
-    return dot_main(args)
-#    except Exception, e:
-#        sys.stderr.write("dot: %s\n" % e)
-#        return 1
+    try:
+        return dot_main(args)
+    except BaseException as e:
+        sys.stderr.write("dot: %s\n" % e)
+        return 1
 
 def script_main():
     return main(sys.argv[1:])

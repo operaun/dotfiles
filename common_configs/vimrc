@@ -1,6 +1,7 @@
 set nocompatible
 filetype off
 
+set fileformat=unix
 set history=1000
 set ruler
 set sc

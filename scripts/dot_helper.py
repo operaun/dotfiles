@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import subprocess
@@ -23,12 +23,12 @@ class DotProcesser(object):
     def confirmContinue(self):
         if (self.disable_warning is True):
             return True 
-        if ("y" == raw_input(bcolors.WARNING + "y/n?: " + bcolors.ENDC)):
+        if ("y" == input(bcolors.WARNING + "y/n?: " + bcolors.ENDC)):
             return True
         return False
 
     def installPackage(self, package, cmd):
-        print cmd + " %s" % package
+        PrintDefault(cmd + " %s" % package)
         subprocess.call(cmd + " %s" % package, shell=True)
 
     def installPackages(self, packages, cmd):
