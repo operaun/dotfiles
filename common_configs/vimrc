@@ -1,6 +1,7 @@
 set nocompatible
 filetype off
 
+set encoding=utf-8
 set fileformat=unix
 set history=1000
 set ruler
@@ -56,6 +57,34 @@ set showmode
 """""""""""""" Wrap
 command! -nargs=* Wrap set wrap linebreak nolist
 
+
+"""""""""""""" Python
+" Enable folding
+"set foldmethod=indent
+"set foldlevel=99
+let python_highlight_all=1
+
+au BufNewFile,BufRead *.py
+\set tabstop=4
+\set softtabstop=4
+\set shiftwidth=4
+\set textwidth=79
+
+au BufNewFile,BufRead *.js, *.html, *.css
+      \ set tabstop=2
+      \ set softtabstop=2
+      \ set shiftwidth=2
+
+"python with virtualenv support
+"py << EOF
+"import os
+"import sys
+"if 'VIRTUAL_ENV' in os.environ:
+"  project_base_dir = os.environ['VIRTUAL_ENV']
+"  activate_this = os.path.join(project_base_dir, 'bin/activate_this.py')
+"  execfile(activate_this, dict(__file__=activate_this))
+"EOF
+
 """""""""""""" Vundle
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -65,15 +94,21 @@ Plugin 'gmarik/Vundle.vim'
 
 Plugin 'vim-airline/vim-airline'
 Plugin 'The-NERD-tree'
-Plugin 'AutoComplPop'
+"Plugin 'AutoComplPop'
 Plugin 'SuperTab'
 Plugin 'matchit.zip'
 Plugin 'unimpaired.vim'
-Plugin 'Syntastic'
+"Plugin 'Syntastic'
 Plugin 'python.vim'
 Plugin 'a.vim'
-Plugin 'vim-startify'
-Plugin 'mileszs/ack.vim'
+"Plugin 'vim-startify'
+"Plugin 'mileszs/ack.vim'
+
+Plugin 'nvie/vim-flake8'
+Plugin 'vim-scripts/indentpython.vim'
+Plugin 'tmhedberg/SimpylFold'
+Plugin 'scrooloose/syntastic'
+Plugin 'Valloric/YouCompleteMe'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -112,9 +147,34 @@ endif
 
 """""""""""""" Alternate
 nmap <F2> :A<CR>
+nmap <F1> <C-Space>
 
 """""""""""""" Ack
 let g:ackprg = 'ag --nogroup --nocolor --column'
+
+"""""""""""""" YCM
+let g:ycm_global_ycm_extra_conf = '~/.vim/.ycm_extra_conf.py'
+let g:ycm_python_binary_path = '/usr/bin/python3'
+let g:ycm_confirm_extra_conf = 0
+let g:ycm_key_list_select_completion = ['<C-j>', '<Down>']
+let g:ycm_key_list_previous_completion = ['<C-k>', '<Up>']
+let g:ycm_warning_symbol = '>*'
+
+let g:ycm_min_num_of_chars_for_completion = 2    " 기본값은 2입니다. 문자가 1개 입력되면 그 때부터 자동완성을 시작합니다. 쓰지 않을려면 99같은 큰 값을 넣어줍니다.
+let g:ycm_auto_trigger = 1    " 기본값은 1입니다. '.'이나 '->'을 받으면 자동으로 목록들을 출력해주죠.
+let g:ycm_collect_identifiers_from_tags_files = 1    " tags 파일을 사용합니다. 성능상 이익이 있는걸로 알고 있습니다.
+let g:ycm_autoclose_preview_window_after_completion=1
+let g:ycm_filetype_whitelist = { '*': 1 }    " 화이트 리스트를 설정합니다.
+let g:ycm_filetype_blacklist = {
+      \ 'tagbar' : 1,
+      \ 'qf' : 1,
+      \ 'notes' : 1,
+      \}    " 블랙 리스트를 설정합니다.
+
+nnoremap <leader>g :YcmCompleter GoTo<CR>
+nnoremap <leader>d :YcmCompleter GoToDeclaration<CR>
+nnoremap <leader>dd :YcmCompleter GoToDefinition<CR>
+nnoremap <leader>r :YcmCompleter GoToReferences<CR>
 
 """""""""""""" startify
 let g:startify_custom_header = [
