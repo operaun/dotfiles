@@ -46,6 +46,15 @@ class ZshTask(CustomTask):
         printHeader("Your new default shell path($SHELL): %s" % zsh_file_path)
         os.system("chsh -s %s" % zsh_file_path)
 
+class VimUpdateTask(CustomTask):
+    def printHelpMessage(self):
+        printBlue("\t Vim 8: upgrade vim version")
+
+    def doWork(self):
+        os.system("add-apt-repository ppa:pi-rho/dev")
+        os.system("apt update")
+        os.system("apt install vim")
+
 class VimColorTask(CustomTask):
     def printHelpMessage(self):
         printBlue("\t Jellybeans color: color for VIM")

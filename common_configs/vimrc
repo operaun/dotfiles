@@ -3,6 +3,7 @@ filetype off
 
 set encoding=utf-8
 set fileformat=unix
+set noswapfile
 set history=1000
 set ruler
 set sc
@@ -59,16 +60,15 @@ command! -nargs=* Wrap set wrap linebreak nolist
 
 
 """""""""""""" Python
-" Enable folding
-"set foldmethod=indent
-"set foldlevel=99
-let python_highlight_all=1
+
+
+"let python_highlight_all=1
 
 au BufNewFile,BufRead *.py
-\set tabstop=4
-\set softtabstop=4
-\set shiftwidth=4
-\set textwidth=79
+  \set tabstop=4
+  \set softtabstop=4
+  \set shiftwidth=4
+  \set textwidth=79
 
 au BufNewFile,BufRead *.js, *.html, *.css
       \ set tabstop=2
@@ -88,27 +88,101 @@ au BufNewFile,BufRead *.js, *.html, *.css
 """""""""""""" Vundle
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
-
-" let Vundle manage Vundle, required
 Plugin 'gmarik/Vundle.vim'
 
-Plugin 'vim-airline/vim-airline'
-Plugin 'The-NERD-tree'
-"Plugin 'AutoComplPop'
-Plugin 'SuperTab'
-Plugin 'matchit.zip'
-Plugin 'unimpaired.vim'
-"Plugin 'Syntastic'
-Plugin 'python.vim'
-Plugin 'a.vim'
-"Plugin 'vim-startify'
-"Plugin 'mileszs/ack.vim'
+" Utilities
+Plugin 'scrooloose/nerdtree'
 
-Plugin 'nvie/vim-flake8'
-Plugin 'vim-scripts/indentpython.vim'
+Plugin 'tpope/vim-fugitive'
+
+Plugin 'airblade/vim-gitgutter'
+
+Plugin 'nathanaelkane/vim-indent-guides'
+
+Plugin 'vim-airline/vim-airline-themes'
+
+Plugin 'ctrlpvim/ctrlp.vim'
+
+Plugin 'unimpaired.vim'
+
+Plugin 'tpope/vim-surround'
+
+Plugin 'tpope/vim-sensible'
+
+"Plugin 'sheerun/vim-polyglot'
+
+Plugin 'raimondi/delimitmate'
+
+Plugin 'bling/vim-airline'
+let g:airline#extensions#tabline#enabled = 1
+
+Plugin 'matchit.zip'
+:source ~/.vim/bundle/matchit.zip/plugin/matchit.vim
+
 Plugin 'tmhedberg/SimpylFold'
+set foldmethod=indent
+set foldlevel=99
+nnoremap <space> za
+:highlight Folded guibg=grey guifg=blue
+:highlight FoldColumn guibg=darkgrey guifg=white
+let g:SimpylFold_docstring_preview = 1
+
+Plugin 'a.vim' " Alternate
+nmap <F2> :A<CR>
+nmap <F1> <C-Space>
+
+Plugin 'ervandew/supertab'
+let g:SuperTabDefaultCompletionType = "<c-n>"
+
+" Python
+"Plugin 'klen/python-mode'
+"Plugin 'python.vim'
+"Plugin 'Valloric/YouCompleteMe'
+"let g:ycm_autoclose_preview_window_after_completion=1
+"map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
+"let g:ycm_python_binary_path = 'python'
+Plugin 'nvie/vim-flake8'
+
+Plugin 'davidhalter/jedi-vim'
+autocmd FileType python setlocal completeopt-=preview
+
+"Plugin 'shougo/neocomplete.vim'
+"let g:neocomplete#enable_at_startup = 1
+"let g:neocomplete#enable_smart_case = 1
+"let g:neocomplete#enable_auto_select = 1
+"let g:neocomplete#sources#syntax#min_keyword_length = 2
+"autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+"autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+"autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+"autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags alternative pattern: '\h\w*\|[^. \t]\.\w*'
+"autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+"if !exists('g:neocomplete#sources#omni#input_patterns')
+"  let g:neocomplete#sources#omni#input_patterns = {}
+"endif
+
+"autocmd FileType python setlocal omnifunc=jedi#completions
+"let g:jedi#completions_enabled = 0
+"let g:jedi#auto_vim_configuration = 0
+"let g:neocomplete#sources#omni#input_patterns.python = '\h\w*\|[^. \t]\.\w*'
+"let g:neocomplete#force_omni_input_patterns.python = '\%([^. \t]\.\|^\s*@\|^\s*from\s.\+import \|^\s*from \|^\s*import \)\w*'
+
+Plugin 'vim-scripts/indentpython.vim'
+let g:indent_guides_auto_colors = 0
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_guide_size=1
+let g:indent_guides_exclude_filetypes = ['help', 'nerdtree']
+hi IndentGuidesOdd ctermbg=black
+hi IndentGuidesEven ctermbg=darkgrey
+
 Plugin 'scrooloose/syntastic'
-Plugin 'Valloric/YouCompleteMe'
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 0
+let g:syntastic_auto_loc_list = 0
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -141,46 +215,3 @@ elseif &term =~ "screen"
   endif
   color jellybeans
 endif
-
-"""""""""""""" matchit
-:source ~/.vim/bundle/matchit.zip/plugin/matchit.vim
-
-"""""""""""""" Alternate
-nmap <F2> :A<CR>
-nmap <F1> <C-Space>
-
-"""""""""""""" Ack
-let g:ackprg = 'ag --nogroup --nocolor --column'
-
-"""""""""""""" YCM
-let g:ycm_global_ycm_extra_conf = '~/.vim/.ycm_extra_conf.py'
-let g:ycm_python_binary_path = '/usr/bin/python3'
-let g:ycm_confirm_extra_conf = 0
-let g:ycm_key_list_select_completion = ['<C-j>', '<Down>']
-let g:ycm_key_list_previous_completion = ['<C-k>', '<Up>']
-let g:ycm_warning_symbol = '>*'
-
-let g:ycm_min_num_of_chars_for_completion = 2    " 기본값은 2입니다. 문자가 1개 입력되면 그 때부터 자동완성을 시작합니다. 쓰지 않을려면 99같은 큰 값을 넣어줍니다.
-let g:ycm_auto_trigger = 1    " 기본값은 1입니다. '.'이나 '->'을 받으면 자동으로 목록들을 출력해주죠.
-let g:ycm_collect_identifiers_from_tags_files = 1    " tags 파일을 사용합니다. 성능상 이익이 있는걸로 알고 있습니다.
-let g:ycm_autoclose_preview_window_after_completion=1
-let g:ycm_filetype_whitelist = { '*': 1 }    " 화이트 리스트를 설정합니다.
-let g:ycm_filetype_blacklist = {
-      \ 'tagbar' : 1,
-      \ 'qf' : 1,
-      \ 'notes' : 1,
-      \}    " 블랙 리스트를 설정합니다.
-
-nnoremap <leader>g :YcmCompleter GoTo<CR>
-nnoremap <leader>d :YcmCompleter GoToDeclaration<CR>
-nnoremap <leader>dd :YcmCompleter GoToDefinition<CR>
-nnoremap <leader>r :YcmCompleter GoToReferences<CR>
-
-"""""""""""""" startify
-let g:startify_custom_header = [
-                \ ' ______________________________________ ',
-                \ '( Almost every programming language is )',
-                \ '( overrated by its practitioners. --   )',
-                \ '( Larry Wall                           )',
-                \ ' ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ ',
-                \ ]

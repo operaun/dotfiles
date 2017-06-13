@@ -47,6 +47,7 @@ class DotProcesser(object):
 
     def installCustoms(self):
         task_manager = custom_task_manager.CustomTaskManager()
+        # task_manager.addTask(custom_task_manager.VimUpdateTask()) # now only support ubuntu
         task_manager.addTask(custom_task_manager.VimColorTask())
         task_manager.addTask(custom_task_manager.VimVundleTask())
         task_manager.addTask(custom_task_manager.ZshTask())
