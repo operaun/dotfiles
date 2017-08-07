@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import os;
 import sys; sys.dont_write_bytecode = True

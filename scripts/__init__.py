@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# scripts/__init__.py
 
 import os;
 import sys; sys.dont_write_bytecode = True
@@ -31,11 +31,11 @@ def dot_main(args):
     processor.installCustoms() # Vundle, Prezt
 
 def main(args):
-    try:
-        return dot_main(args)
-    except BaseException as e:
-        sys.stderr.write("dot: %s\n" % e)
-        return 1
+    # try:
+    return dot_main(args)
+    # except BaseException as e:
+    #     sys.stderr.write("dot: %s\n" % e)
+    #     return 1
 
 def script_main():
     return main(sys.argv[1:])

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# scripts/platform_helper.py
 
 import os;
 import sys; sys.dont_write_bytecode = True

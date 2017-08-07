@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# scripts/pretty_printer.py
 
 class bcolors:
     HEADER = '\033[95m'

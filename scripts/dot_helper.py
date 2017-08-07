@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# scripts/dot_helper.py
 
 import os
 import subprocess
@@ -23,7 +23,7 @@ class DotProcesser(object):
     def confirmContinue(self):
         if (self.disable_warning is True):
             return True 
-        if ("y" == input(bcolors.WARNING + "y/n?: " + bcolors.ENDC)):
+        if ("y" == raw_input(bcolors.WARNING + "y/n?: " + bcolors.ENDC)):
             return True
         return False
 
