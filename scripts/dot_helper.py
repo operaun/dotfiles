@@ -28,7 +28,7 @@ class DotProcesser(object):
         return False
 
     def installPackage(self, package, cmd):
-        PrintDefault(cmd + " %s" % package)
+        printDefault(cmd + " %s" % package)
         subprocess.call(cmd + " %s" % package, shell=True)
 
     def installPackages(self, packages, cmd):

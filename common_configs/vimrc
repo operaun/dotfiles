@@ -131,8 +131,8 @@ Plugin 'a.vim' " Alternate
 nmap <F2> :A<CR>
 nmap <F1> <C-Space>
 
-Plugin 'ervandew/supertab'
-let g:SuperTabDefaultCompletionType = "<c-n>"
+"Plugin 'ervandew/supertab'
+"let g:SuperTabDefaultCompletionType = "<c-n>"
 
 " Python
 "Plugin 'klen/python-mode'
@@ -141,10 +141,10 @@ let g:SuperTabDefaultCompletionType = "<c-n>"
 "let g:ycm_autoclose_preview_window_after_completion=1
 "map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
 "let g:ycm_python_binary_path = 'python'
-Plugin 'nvie/vim-flake8'
+"Plugin 'nvie/vim-flake8'
 
-Plugin 'davidhalter/jedi-vim'
-autocmd FileType python setlocal completeopt-=preview
+"Plugin 'davidhalter/jedi-vim'
+"autocmd FileType python setlocal completeopt-=preview
 
 "Plugin 'shougo/neocomplete.vim'
 "let g:neocomplete#enable_at_startup = 1
@@ -166,23 +166,23 @@ autocmd FileType python setlocal completeopt-=preview
 "let g:neocomplete#sources#omni#input_patterns.python = '\h\w*\|[^. \t]\.\w*'
 "let g:neocomplete#force_omni_input_patterns.python = '\%([^. \t]\.\|^\s*@\|^\s*from\s.\+import \|^\s*from \|^\s*import \)\w*'
 
-Plugin 'vim-scripts/indentpython.vim'
-let g:indent_guides_auto_colors = 0
-let g:indent_guides_enable_on_vim_startup = 1
-let g:indent_guides_guide_size=1
-let g:indent_guides_exclude_filetypes = ['help', 'nerdtree']
-hi IndentGuidesOdd ctermbg=black
-hi IndentGuidesEven ctermbg=darkgrey
+"Plugin 'vim-scripts/indentpython.vim'
+"let g:indent_guides_auto_colors = 0
+"let g:indent_guides_enable_on_vim_startup = 1
+"let g:indent_guides_guide_size=1
+"let g:indent_guides_exclude_filetypes = ['help', 'nerdtree']
+"hi IndentGuidesOdd ctermbg=black
+"hi IndentGuidesEven ctermbg=darkgrey
 
-Plugin 'scrooloose/syntastic'
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
+"Plugin 'scrooloose/syntastic'
+"set statusline+=%#warningmsg#
+"set statusline+=%{SyntasticStatuslineFlag()}
+"set statusline+=%*
 
-let g:syntastic_always_populate_loc_list = 0
-let g:syntastic_auto_loc_list = 0
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
+"let g:syntastic_always_populate_loc_list = 0
+"let g:syntastic_auto_loc_list = 0
+"let g:syntastic_check_on_open = 1
+"let g:syntastic_check_on_wq = 0
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required

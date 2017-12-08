@@ -6,8 +6,6 @@ UBUNTU_PACKAGE_LIST = '''\
 vim
 zsh
 tmux
-git
-silversearcher-ag
 '''
 
 FREEBSD_PACAKAGE_LIST = '''\
