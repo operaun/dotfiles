@@ -30,15 +30,19 @@ fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # =============================================================================
-# 3. chezmoi & Infisical CLI
+# 3. chezmoi 설치
 # =============================================================================
-echo "📦 필수 도구 설치 중..."
-brew install chezmoi infisical/get-cli/infisical
+echo "📦 chezmoi 설치 중..."
+brew install chezmoi
 
 # =============================================================================
 # 4. chezmoi로 dotfiles 적용
 # =============================================================================
-echo "🔧 dotfiles 적용 중..."
+echo ""
+echo "🔧 dotfiles 설정을 시작합니다..."
+echo "   - Profile 선택: personal (개인용) / work (업무용)"
+echo "   - Git 이름/이메일 입력"
+echo ""
 chezmoi init --apply operaun
 
 echo ""
@@ -48,6 +52,8 @@ echo "=============================================="
 echo ""
 echo "다음 단계:"
 echo "  1. 새 터미널을 열어 설정 적용 확인"
-echo "  2. 'auth-start' 실행하여 시크릿 로드"
-echo "  3. 'nvim' 실행하여 LazyVim 플러그인 설치"
+echo "  2. 'nvim' 실행하여 LazyVim 플러그인 설치"
+echo ""
+echo "💡 Personal 프로필을 선택했다면:"
+echo "   - 'auth-start' 실행하여 SSH/GPG 키 로드"
 echo ""
