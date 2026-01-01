@@ -69,29 +69,75 @@ alias lg="lazygit"
 # | cd /long/path && cd -     | z path (학습 후 자동 점프)    | zoxide: 히스토리 기반   |
 
 # -----------------------------------------------------------------------------
-# 시크릿 캐시 관리 (auth-start / auth-stop)
+# 시크릿 및 키 관리 (auth-start / auth-stop)
 # -----------------------------------------------------------------------------
 SECRETS_CACHE="$HOME/.secrets.env"
 SECRETS_TTL=28800  # 8시간 (초)
+SSH_KEY_CACHE="/tmp/.ssh_key_$$"  # 프로세스별 임시 파일
 
 auth-start() {
-  echo "🔐 Infisical에서 시크릿 로딩..."
+  echo "🔐 Infisical에서 인증 정보 로딩..."
+  
+  # 1. Infisical 로그인 확인
   if ! infisical whoami &>/dev/null; then
     infisical login
   fi
+  
+  # 2. 환경변수 시크릿 로드
   infisical export --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --format=dotenv > "$SECRETS_CACHE"
   chmod 600 "$SECRETS_CACHE"
   source "$SECRETS_CACHE"
-  echo "✅ 시크릿 로드 완료 (8시간 유효)"
+  
+  # 3. SSH 키 로드 (Infisical에 SSH_PRIVATE_KEY가 있는 경우)
+  if infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" &>/dev/null; then
+    echo "🔑 SSH 키 로딩 중..."
+    eval "$(ssh-agent -s)" > /dev/null
+    
+    # 임시 파일에 키 저장 (메모리 기반 /tmp 사용)
+    infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain > "$SSH_KEY_CACHE"
+    chmod 600 "$SSH_KEY_CACHE"
+    
+    # ssh-agent에 추가
+    ssh-add "$SSH_KEY_CACHE" 2>/dev/null
+    
+    # 임시 파일 즉시 삭제 (키는 ssh-agent 메모리에만 유지)
+    rm -f "$SSH_KEY_CACHE"
+    
+    echo "✅ SSH 키가 ssh-agent에 로드됨"
+  fi
+  
+  # 4. GPG 서명키 설정 (Infisical에 GIT_SIGNING_KEY가 있는 경우)
+  if [[ -n "${GIT_SIGNING_KEY:-}" ]]; then
+    git config --global user.signingkey "$GIT_SIGNING_KEY"
+    git config --global commit.gpgsign true
+    echo "✅ GPG 서명키 설정됨"
+  fi
+  
+  echo "✅ 인증 완료 (8시간 유효)"
 }
 
 auth-stop() {
+  echo "🔒 인증 정보 정리 중..."
+  
+  # 1. 시크릿 캐시 삭제
   if [[ -f "$SECRETS_CACHE" ]]; then
     rm -f "$SECRETS_CACHE"
-    echo "🔒 시크릿 캐시 삭제됨"
   fi
-  # 환경변수 unset (필요시 추가)
-  unset GITHUB_TOKEN GIT_SIGNING_KEY 2>/dev/null || true
+  
+  # 2. ssh-agent에서 모든 키 제거
+  ssh-add -D 2>/dev/null || true
+  
+  # 3. 임시 SSH 키 파일 삭제 (있다면)
+  rm -f /tmp/.ssh_key_* 2>/dev/null || true
+  
+  # 4. Git 서명 설정 해제
+  git config --global --unset user.signingkey 2>/dev/null || true
+  git config --global --unset commit.gpgsign 2>/dev/null || true
+  
+  # 5. 환경변수 unset
+  unset GITHUB_TOKEN GIT_SIGNING_KEY SSH_PRIVATE_KEY 2>/dev/null || true
+  
+  echo "✅ 모든 인증 정보 삭제됨"
 }
 
 # 쉘 시작시 캐시 유효성 체크
@@ -101,6 +147,6 @@ if [[ -f "$SECRETS_CACHE" ]]; then
     source "$SECRETS_CACHE"
   else
     rm -f "$SECRETS_CACHE"
-    echo "⏰ 시크릿 캐시 만료 (8시간 경과)"
+    echo "⏰ 시크릿 캐시 만료 (8시간 경과) - auth-start로 재인증 필요"
   fi
 fi
