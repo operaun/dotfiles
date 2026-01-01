@@ -15,7 +15,7 @@ if ! command -v brew &>/dev/null; then
 fi
 
 # brew bundle 실행
-brew bundle --file="{{ .chezmoi.homeDir }}/.Brewfile" --no-lock
+brew bundle --file="{{ .chezmoi.homeDir }}/.Brewfile"
 
 echo "✅ Homebrew 패키지 설치 완료"
 {{- end }}
