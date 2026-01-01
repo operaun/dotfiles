@@ -35,6 +35,9 @@ brew "httpie"       # curl 대체
 # Neovim
 brew "neovim"
 
+# Fonts (Nerd Fonts for terminal/Starship)
+cask "font-jetbrains-mono-nerd-font"
+
 # Casks
 cask "adguard"
 cask "antigravity"
