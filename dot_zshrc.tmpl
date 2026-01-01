@@ -133,7 +133,10 @@ auth-start() {
   # 4. SSH 키 로드 (Infisical에 SSH_PRIVATE_KEY가 있는 경우)
   if infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" &>/dev/null; then
     echo "🔑 SSH 키 로딩 중..."
-    eval "$(ssh-agent -s)" > /dev/null
+    # Use existing SSH_AUTH_SOCK if available (macOS default), otherwise start new one
+    if [[ -z "$SSH_AUTH_SOCK" ]]; then
+      eval "$(ssh-agent -s)" > /dev/null
+    fi
     
     ssh_key_tmp=$(mktemp)
     infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain > "$ssh_key_tmp"
