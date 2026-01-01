@@ -142,8 +142,8 @@ auth-start() {
     infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain > "$ssh_key_tmp"
     chmod 600 "$ssh_key_tmp"
     
-    # ssh-agent에 추가 후 즉시 삭제
-    ssh-add "$ssh_key_tmp" 2>/dev/null
+    # ssh-agent에 추가 후 즉시 삭제 (TTL 적용: 8시간)
+    ssh-add -t $SECRETS_TTL "$ssh_key_tmp" 2>/dev/null
     rm -f "$ssh_key_tmp"
     ssh_key_tmp=""
     
