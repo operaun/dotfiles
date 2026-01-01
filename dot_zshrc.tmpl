@@ -101,6 +101,12 @@ SECRETS_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/secrets.env"
 SECRETS_TTL=28800  # 8시간 (초)
 
 auth-start() {
+  # Infisical CLI 설치 확인
+  if ! command -v infisical &>/dev/null; then
+    echo "❌ Infisical CLI가 설치되지 않았습니다."
+    return 1
+  fi
+
   # Zsh 함수 종료 시 trap 실행을 위해 필요한 옵션
   setopt LOCAL_TRAPS
   
