@@ -101,11 +101,14 @@ SECRETS_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/secrets.env"
 SECRETS_TTL=28800  # 8시간 (초)
 
 auth-start() {
+  # Zsh 함수 종료 시 trap 실행을 위해 필요한 옵션
+  setopt LOCAL_TRAPS
+  
   echo "🔐 Infisical에서 인증 정보 로딩..."
   
   # 임시 파일 변수 선언 (trap에서 사용)
   local ssh_key_tmp="" gpg_key_tmp=""
-  trap 'rm -f "$ssh_key_tmp" "$gpg_key_tmp" 2>/dev/null' RETURN
+  trap 'rm -f "$ssh_key_tmp" "$gpg_key_tmp" 2>/dev/null' EXIT
   
   # 1. Infisical 로그인 확인
   if ! infisical whoami &>/dev/null; then
