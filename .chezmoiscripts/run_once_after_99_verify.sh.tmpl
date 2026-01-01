@@ -1,0 +1,78 @@
+#!/bin/bash
+set -euo pipefail
+
+{{ if eq .chezmoi.os "darwin" -}}
+echo "🔍 설치 검증 중..."
+echo ""
+
+# =============================================================================
+# Homebrew 설치 확인
+# =============================================================================
+missing_tools=()
+
+check_command() {
+  if command -v "$1" &>/dev/null; then
+    echo "✅ $1"
+  else
+    echo "❌ $1 - 설치 필요"
+    missing_tools+=("$1")
+  fi
+}
+
+# CLI 도구 검증
+echo "📦 CLI 도구:"
+check_command "starship"
+check_command "zoxide"
+check_command "eza"
+check_command "bat"
+check_command "fd"
+check_command "rg"
+check_command "fzf"
+check_command "lazygit"
+check_command "tldr"
+check_command "jq"
+check_command "nvim"
+
+{{ if .isPersonal -}}
+# Personal 전용 도구
+echo ""
+echo "🔐 Personal 전용:"
+check_command "infisical"
+check_command "gpg"
+{{- end }}
+
+# =============================================================================
+# 설정 파일 검증
+# =============================================================================
+echo ""
+echo "📄 설정 파일:"
+
+check_file() {
+  if [[ -f "$1" ]]; then
+    echo "✅ $1"
+  else
+    echo "❌ $1 - 없음"
+  fi
+}
+
+check_file "$HOME/.zshrc"
+check_file "$HOME/.gitconfig"
+check_file "$HOME/.Brewfile"
+
+if [[ -d "$HOME/.config/nvim" ]]; then
+  echo "✅ ~/.config/nvim (LazyVim)"
+else
+  echo "❌ ~/.config/nvim - LazyVim 미설치"
+fi
+
+# =============================================================================
+# 결과 요약
+# =============================================================================
+echo ""
+if [[ ${#missing_tools[@]} -eq 0 ]]; then
+  echo "🎉 모든 검증 통과!"
+else
+  echo "⚠️  누락된 도구: ${missing_tools[*]}"
+  echo "   'brew bundle --file=~/.Brewfile' 실행 권장"
+fi
+{{- end }}

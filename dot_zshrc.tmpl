@@ -24,10 +24,10 @@ export NVM_DIR="$HOME/.nvm"
 # NVM lazy loading: nvm, node, npm 등 첫 호출 시에만 로드
 _nvm_lazy_load() {
   unset -f nvm node npm npx pnpm yarn 2>/dev/null
-  if [[ -x /opt/homebrew/opt/nvm/nvm.sh ]]; then
+  if [[ -f /opt/homebrew/opt/nvm/nvm.sh ]]; then
     source "/opt/homebrew/opt/nvm/nvm.sh"
     [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && source "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
-  elif [[ -x /usr/local/opt/nvm/nvm.sh ]]; then
+  elif [[ -f /usr/local/opt/nvm/nvm.sh ]]; then
     source "/usr/local/opt/nvm/nvm.sh"
   fi
 }
@@ -97,51 +97,51 @@ alias lg="lazygit"
 # -----------------------------------------------------------------------------
 # 시크릿 및 키 관리 (auth-start / auth-stop) - Personal 전용
 # -----------------------------------------------------------------------------
-SECRETS_CACHE="$HOME/.secrets.env"
+SECRETS_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/secrets.env"
 SECRETS_TTL=28800  # 8시간 (초)
 
 auth-start() {
   echo "🔐 Infisical에서 인증 정보 로딩..."
+  
+  # 임시 파일 변수 선언 (trap에서 사용)
+  local ssh_key_tmp="" gpg_key_tmp=""
+  trap 'rm -f "$ssh_key_tmp" "$gpg_key_tmp" 2>/dev/null' RETURN
   
   # 1. Infisical 로그인 확인
   if ! infisical whoami &>/dev/null; then
     infisical login
   fi
   
-  # 2. 환경변수 시크릿 로드
+  # 2. 캐시 디렉토리 생성 (XDG 규격)
+  mkdir -p "$(dirname "$SECRETS_CACHE")"
+  
+  # 3. 환경변수 시크릿 로드
   infisical export --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --format=dotenv > "$SECRETS_CACHE"
   chmod 600 "$SECRETS_CACHE"
   source "$SECRETS_CACHE"
   
-  # 3. SSH 키 로드 (Infisical에 SSH_PRIVATE_KEY가 있는 경우)
+  # 4. SSH 키 로드 (Infisical에 SSH_PRIVATE_KEY가 있는 경우)
   if infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" &>/dev/null; then
     echo "🔑 SSH 키 로딩 중..."
     eval "$(ssh-agent -s)" > /dev/null
     
-    # 안전한 임시 파일 생성 (종료 시 자동 삭제)
-    local ssh_key_tmp
     ssh_key_tmp=$(mktemp)
-    trap "rm -f '$ssh_key_tmp'" RETURN
-    
     infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain > "$ssh_key_tmp"
     chmod 600 "$ssh_key_tmp"
     
     # ssh-agent에 추가 후 즉시 삭제
     ssh-add "$ssh_key_tmp" 2>/dev/null
     rm -f "$ssh_key_tmp"
+    ssh_key_tmp=""
     
     echo "✅ SSH 키가 ssh-agent에 로드됨"
   fi
   
-  # 4. GPG 개인키 로드 (Infisical에 GPG_PRIVATE_KEY가 있는 경우)
+  # 5. GPG 개인키 로드 (Infisical에 GPG_PRIVATE_KEY가 있는 경우)
   if infisical secrets get GPG_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" &>/dev/null; then
     echo "🔏 GPG 키 로딩 중..."
     
-    # 안전한 임시 파일 생성 (종료 시 자동 삭제)
-    local gpg_key_tmp
     gpg_key_tmp=$(mktemp)
-    trap "rm -f '$gpg_key_tmp'" RETURN
-    
     infisical secrets get GPG_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain > "$gpg_key_tmp"
     chmod 600 "$gpg_key_tmp"
     
@@ -150,14 +150,16 @@ auth-start() {
       echo "⚠️  GPG 키 import 실패 (이미 존재하거나 형식 오류)"
     fi
     rm -f "$gpg_key_tmp"
+    gpg_key_tmp=""
     
     echo "✅ GPG 키가 keyring에 로드됨"
   fi
   
-  # 5. GPG 서명키 설정
+  # 6. GPG 서명키 설정 (동적 파일 사용)
   if [[ -n "${GIT_SIGNING_KEY:-}" ]]; then
-    git config --global user.signingkey "$GIT_SIGNING_KEY"
-    git config --global commit.gpgsign true
+    touch "$HOME/.gitconfig_env"
+    git config -f "$HOME/.gitconfig_env" user.signingkey "$GIT_SIGNING_KEY"
+    git config -f "$HOME/.gitconfig_env" commit.gpgsign true
     echo "✅ GPG 서명키 설정됨: $GIT_SIGNING_KEY"
   fi
   
@@ -186,9 +188,12 @@ auth-stop() {
     echo "✅ GPG 개인키 삭제됨"
   fi
   
-  # 5. Git 서명 설정 해제
-  git config --global --unset user.signingkey 2>/dev/null || true
-  git config --global --unset commit.gpgsign 2>/dev/null || true
+  # 5. Git 서명 설정 해제 (동적 파일 정리)
+  if [[ -f "$HOME/.gitconfig_env" ]]; then
+    git config -f "$HOME/.gitconfig_env" --unset user.signingkey 2>/dev/null || true
+    git config -f "$HOME/.gitconfig_env" --unset commit.gpgsign 2>/dev/null || true
+    # 파일이 비었으면 삭제하는 것도 좋으나 유지해도 무방
+  fi
   
   # 6. 환경변수 unset
   unset GITHUB_TOKEN GIT_SIGNING_KEY SSH_PRIVATE_KEY GPG_PRIVATE_KEY 2>/dev/null || true

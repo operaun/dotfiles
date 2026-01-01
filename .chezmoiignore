@@ -6,3 +6,6 @@
 .gnupg/public_key.asc
 .gnupg/gpg-agent.conf
 {{- end }}
+
+# 동적 Git 설정 파일 (auth-start 관리)
+.gitconfig_env
