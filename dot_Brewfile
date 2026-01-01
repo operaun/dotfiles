@@ -1,0 +1,56 @@
+# Taps
+tap "homebrew/bundle"
+tap "infisical/get-cli"
+
+# CLI Tools (기존)
+brew "bat"
+brew "chezmoi"
+brew "codex"
+brew "docker"
+brew "fzf"
+brew "gh"
+brew "gnupg"
+brew "go"
+brew "htop"
+brew "mas"
+brew "nvm"
+brew "pipenv"
+brew "python@3.13"
+brew "tree"
+brew "uv"
+brew "wget"
+brew "infisical/get-cli/infisical"
+
+# CLI Tools (추가 - 모던 대체 도구)
+brew "starship"     # 모던 쉘 프롬프트
+brew "zoxide"       # 스마트 cd
+brew "jq"           # JSON 처리
+brew "fd"           # find 대체
+brew "ripgrep"      # grep 대체
+brew "eza"          # ls 대체 (exa 후속)
+brew "lazygit"      # Git TUI
+brew "tldr"         # man 대체
+brew "httpie"       # curl 대체
+
+# Neovim
+brew "neovim"
+
+# Casks
+cask "adguard"
+cask "antigravity"
+cask "arc"
+cask "cheatsheet"
+cask "google-chrome"
+cask "iina"
+cask "karabiner-elements"
+cask "linearmouse"
+cask "microsoft-auto-update"
+cask "microsoft-office"
+cask "naver-whale"
+cask "obsidian"
+cask "postman"
+cask "raycast"
+cask "rectangle"
+cask "shottr"
+cask "slack"
+cask "warp"

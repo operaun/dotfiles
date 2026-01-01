@@ -1,0 +1,18 @@
+#!/bin/bash
+set -euo pipefail
+
+{{ if eq .chezmoi.os "darwin" -}}
+# Infisical CLI 설치 확인
+if ! command -v infisical &>/dev/null; then
+  echo "⚠️  Infisical CLI가 없습니다. Homebrew로 설치됩니다."
+  exit 0
+fi
+
+# 로그인 상태 확인
+if ! infisical whoami &>/dev/null; then
+  echo "🔐 Infisical 로그인이 필요합니다..."
+  infisical login
+fi
+
+echo "✅ Infisical 인증 완료"
+{{- end }}

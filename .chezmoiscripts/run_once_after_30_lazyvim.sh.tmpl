@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euo pipefail
+
+{{ if eq .chezmoi.os "darwin" -}}
+# LazyVim 설치 (설치되어 있지 않은 경우에만)
+if [[ ! -d "$HOME/.config/nvim" ]]; then
+  echo "📦 LazyVim 설치 중..."
+  
+  # Neovim 설치 확인
+  if ! command -v nvim &>/dev/null; then
+    echo "⚠️  Neovim이 없습니다. brew bundle 후 다시 실행하세요."
+    exit 0
+  fi
+  
+  # LazyVim starter 클론
+  git clone https://github.com/LazyVim/starter "$HOME/.config/nvim"
+  rm -rf "$HOME/.config/nvim/.git"
+  
+  echo "✅ LazyVim 설치 완료"
+  echo "ℹ️  첫 실행 시 nvim을 열면 플러그인이 자동 설치됩니다."
+else
+  echo "ℹ️  Neovim 설정이 이미 존재합니다."
+fi
+{{- end }}

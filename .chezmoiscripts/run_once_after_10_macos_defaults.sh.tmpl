@@ -1,0 +1,86 @@
+#!/bin/bash
+set -euo pipefail
+
+{{ if eq .chezmoi.os "darwin" -}}
+echo "🍎 macOS 시스템 설정 적용 중..."
+
+# =============================================================================
+# 키보드
+# =============================================================================
+defaults write NSGlobalDomain KeyRepeat -int 2
+defaults write NSGlobalDomain InitialKeyRepeat -int 15
+
+# =============================================================================
+# Finder 설정
+# =============================================================================
+defaults write com.apple.finder ShowPathbar -bool true
+defaults write com.apple.finder ShowStatusBar -bool true
+defaults write com.apple.finder AppleShowAllFiles -bool true
+defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
+
+# 폴더 우선 정렬
+defaults write com.apple.finder _FXSortFoldersFirst -bool true
+defaults write com.apple.finder _FXSortFoldersFirstOnDesktop -bool true
+
+# 폴더 내 검색 (현재 폴더에서 검색)
+defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
+
+# 기본 정렬: 이름순
+defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
+defaults write com.apple.finder FXArrangeGroupViewBy -string "Name"
+
+# =============================================================================
+# Dock
+# =============================================================================
+defaults write com.apple.dock autohide -bool true
+defaults write com.apple.dock autohide-delay -float 0
+defaults write com.apple.dock show-recents -bool false
+defaults write com.apple.dock minimize-to-application -bool true
+
+# =============================================================================
+# 애니메이션 속도 줄이기
+# =============================================================================
+defaults write com.apple.dock expose-animation-duration -float 0.1
+defaults write com.apple.dock workspaces-swoosh-animation-off -bool true
+defaults write com.apple.dock autohide-time-modifier -float 0.2
+
+# =============================================================================
+# 스크린샷
+# =============================================================================
+defaults write com.apple.screencapture location -string "$HOME/Desktop"
+defaults write com.apple.screencapture type -string "png"
+defaults write com.apple.screencapture disable-shadow -bool true
+
+# =============================================================================
+# 기타
+# =============================================================================
+defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+
+# =============================================================================
+# 글로벌 키보드 단축키 (NSUserKeyEquivalents)
+# =============================================================================
+# 전체화면 토글: Control + Command + F (모든 앱에서)
+defaults write NSGlobalDomain NSUserKeyEquivalents -dict-add "Enter Full Screen" "@^f"
+defaults write NSGlobalDomain NSUserKeyEquivalents -dict-add "Exit Full Screen" "@^f"
+defaults write NSGlobalDomain NSUserKeyEquivalents -dict-add "전체 화면 시작" "@^f"
+defaults write NSGlobalDomain NSUserKeyEquivalents -dict-add "전체 화면 종료" "@^f"
+
+# =============================================================================
+# 설정 적용
+# =============================================================================
+killall Finder Dock SystemUIServer cfprefsd 2>/dev/null || true
+
+echo "✅ macOS 시스템 설정 완료"
+
+# =============================================================================
+# 수동 설정 안내 (defaults로 불가능한 항목)
+# =============================================================================
+echo ""
+echo "ℹ️  아래 단축키는 시스템 환경설정에서 수동 설정이 필요합니다:"
+echo "   • 데스크탑 보기: Option + D"
+echo "     → 시스템 설정 > 키보드 > 키보드 단축키 > Mission Control > 데스크탑 보기"
+echo "   • Dock 표시/숨기기: Option + Shift + D"
+echo "     → 시스템 설정 > 키보드 > 키보드 단축키 > Launchpad 및 Dock"
+echo ""
+{{- end }}

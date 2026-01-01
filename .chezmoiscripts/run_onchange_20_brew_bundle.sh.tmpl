@@ -1,0 +1,21 @@
+#!/bin/bash
+set -euo pipefail
+
+# Brewfile 변경 감지용 해시
+# {{ include "dot_Brewfile" | sha256sum }}
+
+{{ if eq .chezmoi.os "darwin" -}}
+echo "🍺 Homebrew 패키지 설치 중..."
+
+# Homebrew 설치 확인
+if ! command -v brew &>/dev/null; then
+  echo "Homebrew 설치 중..."
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+# brew bundle 실행
+brew bundle --file="{{ .chezmoi.homeDir }}/.Brewfile" --no-lock
+
+echo "✅ Homebrew 패키지 설치 완료"
+{{- end }}

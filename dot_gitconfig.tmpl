@@ -1,0 +1,25 @@
+[user]
+	name = {{ .name }}
+	email = {{ .email }}
+
+[core]
+	quotepath = false
+	editor = nvim
+	autocrlf = input
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+[alias]
+	s = status -sb
+	co = checkout
+	br = branch
+	lg = log --oneline --graph --decorate
+	last = log -1 HEAD
+	unstage = reset HEAD --

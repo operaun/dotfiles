@@ -1,0 +1,32 @@
+#!/bin/bash
+set -euo pipefail
+
+{{ if eq .chezmoi.os "darwin" -}}
+# =============================================================================
+# Shottr 설정
+# =============================================================================
+# Shottr 단축키는 앱 내에서 설정해야 합니다.
+# 아래는 설정 안내입니다.
+
+echo "📸 Shottr 설정 안내"
+echo ""
+echo "Shottr 앱을 열고 아래와 같이 단축키를 설정하세요:"
+echo "  1. 메뉴바 아이콘 클릭 → Settings → Hotkeys"
+echo "  2. Fullscreen screenshot: ⇧⌘3"
+echo "  3. Area screenshot: ⇧⌘4"
+echo ""
+echo "💡 시스템 스크린샷 단축키와 충돌을 피하려면,"
+echo "   시스템 설정 > 키보드 > 키보드 단축키 > 스크린샷에서"
+echo "   기존 ⇧⌘3, ⇧⌘4를 비활성화하세요."
+echo ""
+
+# Shottr plist가 있으면 단축키 설정 시도
+# (Shottr가 한 번이라도 실행되어야 plist 생성됨)
+if defaults read cc.ffitch.shottr &>/dev/null 2>&1; then
+  # 전체화면: Shift + Command + 3 (keyCode)
+  defaults write cc.ffitch.shottr fullscreenHotkey -dict keyCode -int 20 modifiers -int 1179648
+  # 영역 선택: Shift + Command + 4
+  defaults write cc.ffitch.shottr areaHotkey -dict keyCode -int 21 modifiers -int 1179648
+  echo "✅ Shottr 단축키가 자동 설정되었습니다."
+fi
+{{- end }}
