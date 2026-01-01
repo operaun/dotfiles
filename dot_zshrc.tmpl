@@ -73,8 +73,9 @@ alias lg="lazygit"
 # | man command               | tldr command                  | 전체 매뉴얼은 orig-man  |
 # | cd /long/path && cd -     | z path (학습 후 자동 점프)    | zoxide: 히스토리 기반   |
 
+{{- if .isPersonal }}
 # -----------------------------------------------------------------------------
-# 시크릿 및 키 관리 (auth-start / auth-stop)
+# 시크릿 및 키 관리 (auth-start / auth-stop) - Personal 전용
 # -----------------------------------------------------------------------------
 SECRETS_CACHE="$HOME/.secrets.env"
 SECRETS_TTL=28800  # 8시간 (초)
@@ -176,3 +177,5 @@ if [[ -f "$SECRETS_CACHE" ]]; then
     echo "⏰ 시크릿 캐시 만료 (8시간 경과) - auth-start로 재인증 필요"
   fi
 fi
+{{- end }}
+

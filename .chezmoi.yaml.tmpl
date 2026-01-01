@@ -1,9 +1,13 @@
 {{- $name := promptStringOnce . "name" "Git user name" -}}
 {{- $email := promptStringOnce . "email" "Git email address" -}}
+{{- $profile := promptChoiceOnce . "profile" "Profile type" (list "personal" "work") -}}
 
 data:
   name: {{ $name | quote }}
   email: {{ $email | quote }}
-  # Infisical 설정 (하드코딩)
+  profile: {{ $profile | quote }}
+  isPersonal: {{ eq $profile "personal" }}
+  isWork: {{ eq $profile "work" }}
+  # Infisical 설정 (personal 전용)
   infisicalProjectId: "d7915e0f-395e-4292-b0e3-9966c2efb2a0"
   infisicalEnv: "dev"

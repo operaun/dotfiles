@@ -1,0 +1,8 @@
+{{- if .isWork }}
+# Work 프로필에서 제외할 파일들
+
+# SSH/GPG 개인 설정
+.ssh/id_ed25519.pub
+.gnupg/public_key.asc
+.gnupg/gpg-agent.conf
+{{- end }}
