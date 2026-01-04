@@ -11,6 +11,21 @@ elif [[ -x /usr/local/bin/brew ]]; then
   eval "$(/usr/local/bin/brew shellenv)"
 fi
 
+
+# -----------------------------------------------------------------------------
+# SSH Agent 설정을 전역적으로 유지 (모든 쉘이 공유)
+# -----------------------------------------------------------------------------
+export SSH_AUTH_SOCK="$HOME/.ssh/ssh-agent.sock"
+
+# 에이전트가 실행 중인지 확인 (연결 불가 시 2 반환)
+ssh-add -l > /dev/null 2>&1
+if [ $? -eq 2 ]; then
+    # 기존 소켓 파일 정리
+    rm -f "$SSH_AUTH_SOCK"
+    # 새 에이전트 시작 (소켓 경로 고정)
+    (umask 066; ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null)
+fi
+
 # -----------------------------------------------------------------------------
 # GPG 설정 (터미널에서 pinentry 사용)
 # -----------------------------------------------------------------------------
@@ -133,10 +148,6 @@ auth-start() {
   # 4. SSH 키 로드 (Infisical에 SSH_PRIVATE_KEY가 있는 경우)
   if infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" &>/dev/null; then
     echo "🔑 SSH 키 로딩 중..."
-    # Use existing SSH_AUTH_SOCK if available (macOS default), otherwise start new one
-    if [[ -z "$SSH_AUTH_SOCK" ]]; then
-      eval "$(ssh-agent -s)" > /dev/null
-    fi
     
     ssh_key_tmp=$(mktemp)
     infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain > "$ssh_key_tmp"
