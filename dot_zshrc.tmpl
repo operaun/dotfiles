@@ -35,25 +35,15 @@ gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
 # -----------------------------------------------------------------------------
 # NVM 설정 (Lazy Loading - 쉘 시작 속도 개선)
 # -----------------------------------------------------------------------------
+# NVM Standard Loading (CLI 호환성 위해 Lazy Load 비활성화)
 export NVM_DIR="$HOME/.nvm"
 
-# NVM lazy loading: nvm, node, npm 등 첫 호출 시에만 로드
-_nvm_lazy_load() {
-  unset -f nvm node npm npx pnpm yarn 2>/dev/null
-  if [[ -f /opt/homebrew/opt/nvm/nvm.sh ]]; then
-    source "/opt/homebrew/opt/nvm/nvm.sh"
-    [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && source "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
-  elif [[ -f /usr/local/opt/nvm/nvm.sh ]]; then
-    source "/usr/local/opt/nvm/nvm.sh"
-  fi
-}
-
-nvm() { _nvm_lazy_load; nvm "$@"; }
-node() { _nvm_lazy_load; node "$@"; }
-npm() { _nvm_lazy_load; npm "$@"; }
-npx() { _nvm_lazy_load; npx "$@"; }
-pnpm() { _nvm_lazy_load; pnpm "$@"; }
-yarn() { _nvm_lazy_load; yarn "$@"; }
+if [[ -f /opt/homebrew/opt/nvm/nvm.sh ]]; then
+  source "/opt/homebrew/opt/nvm/nvm.sh"
+  [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && source "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+elif [[ -f /usr/local/opt/nvm/nvm.sh ]]; then
+  source "/usr/local/opt/nvm/nvm.sh"
+fi
 
 # -----------------------------------------------------------------------------
 # PATH 설정

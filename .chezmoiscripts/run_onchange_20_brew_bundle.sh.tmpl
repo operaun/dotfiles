@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Brewfile 변경 감지용 해시
-# {{ include "dot_Brewfile" | sha256sum }}
+# {{ include "dot_Brewfile.tmpl" | sha256sum }}
 
 {{ if eq .chezmoi.os "darwin" -}}
 echo "🍺 Homebrew 패키지 설치 중..."
