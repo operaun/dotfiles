@@ -134,8 +134,16 @@ auth-start() {
   mkdir -p "$(dirname "$SECRETS_CACHE")"
   
   # 3. 환경변수 시크릿 로드 (PRIVATE_KEY 제외)
-  # grep -v로 PRIVATE_KEY가 포함된 줄을 제외하고 저장하여 안전 확보
-  infisical export --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --format=dotenv | grep -v "PRIVATE_KEY" > "$SECRETS_CACHE"
+  # JSON 포맷으로 export 후 jq를 사용하여 안전하게 파싱 및 이스케이프 (멀티라인 시크릿 지원)
+  # jq가 없으면 설치 안내
+  if ! command -v jq &>/dev/null; then
+      echo "❌ jq가 설치되지 않았습니다. 'brew install jq'를 실행하세요."
+      return 1
+  fi
+
+  infisical export --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --format=json | \
+    jq -r '(if type=="array" then . else to_entries end) | map(select(.key | contains("PRIVATE_KEY") | not)) | map("export \(.key)=\(.value | @sh)") | .[]' > "$SECRETS_CACHE"
+  
   chmod 600 "$SECRETS_CACHE"
   source "$SECRETS_CACHE"
   

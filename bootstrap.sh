@@ -49,7 +49,10 @@ echo "🔧 dotfiles 설정을 시작합니다..."
 echo "   - Profile 선택: personal (개인용) / work (업무용)"
 echo "   - Git 이름/이메일 입력"
 echo ""
-chezmoi init --apply operaun
+if ! chezmoi init --apply operaun; then
+  echo "❌ chezmoi 설정 적용에 실패했습니다."
+  exit 1
+fi
 
 echo ""
 echo "=============================================="
