@@ -123,14 +123,7 @@ auth-start() {
     return 1
   fi
 
-  # Zsh 함수 종료 시 trap 실행을 위해 필요한 옵션
-  setopt LOCAL_TRAPS
-  
   echo "🔐 Infisical에서 인증 정보 로딩..."
-  
-  # 임시 파일 변수 선언 (trap에서 사용)
-  local ssh_key_tmp="" gpg_key_tmp=""
-  trap 'rm -f "$ssh_key_tmp" "$gpg_key_tmp" 2>/dev/null' EXIT
   
   # 1. Infisical 로그인 확인
   if ! infisical whoami &>/dev/null; then
@@ -140,64 +133,54 @@ auth-start() {
   # 2. 캐시 디렉토리 생성 (XDG 규격)
   mkdir -p "$(dirname "$SECRETS_CACHE")"
   
-  # 3. 환경변수 시크릿 로드
-  infisical export --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --format=dotenv > "$SECRETS_CACHE"
+  # 3. 환경변수 시크릿 로드 (PRIVATE_KEY 제외)
+  # grep -v로 PRIVATE_KEY가 포함된 줄을 제외하고 저장하여 안전 확보
+  infisical export --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --format=dotenv | grep -v "PRIVATE_KEY" > "$SECRETS_CACHE"
   chmod 600 "$SECRETS_CACHE"
   source "$SECRETS_CACHE"
   
-  # 4. SSH 키 로드 (Infisical에 SSH_PRIVATE_KEY가 있는 경우)
+  # 4. SSH 키 로드 (파이프 사용, 임시 파일 없음)
   if infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" &>/dev/null; then
     echo "🔑 SSH 키 로딩 중..."
+    # ssh-add가 stdin(-)에서 키를 읽도록 함, -t 옵션으로 TTL 설정
+    infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain | ssh-add -t $SECRETS_TTL - 2>/dev/null
     
-    ssh_key_tmp=$(mktemp)
-    infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain > "$ssh_key_tmp"
-    chmod 600 "$ssh_key_tmp"
-    
-    # ssh-agent에 추가 후 즉시 삭제 (TTL 적용: 8시간)
-    ssh-add -t $SECRETS_TTL "$ssh_key_tmp" 2>/dev/null
-    rm -f "$ssh_key_tmp"
-    ssh_key_tmp=""
-    
-    echo "✅ SSH 키가 ssh-agent에 로드됨"
+    if [ $? -eq 0 ]; then
+        echo "✅ SSH 키가 ssh-agent에 로드됨 (8시간 유효)"
+    else
+        echo "⚠️  SSH 키 로드 실패"
+    fi
   fi
   
-  # 5. GPG 개인키 로드 (Infisical에 GPG_PRIVATE_KEY가 있는 경우)
+  # 5. GPG 개인키 로드 (파이프 사용, 임시 파일 없음)
   if infisical secrets get GPG_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" &>/dev/null; then
     echo "🔏 GPG 키 로딩 중..."
     
-    gpg_key_tmp=$(mktemp)
-    infisical secrets get GPG_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain > "$gpg_key_tmp"
-    chmod 600 "$gpg_key_tmp"
-    
-    # GPG keyring에 import (이미 있으면 스킵)
-    if ! gpg --batch --import "$gpg_key_tmp" 2>/dev/null; then
-      echo "⚠️  GPG 키 import 실패 (이미 존재하거나 형식 오류)"
-    fi
-    rm -f "$gpg_key_tmp"
-    gpg_key_tmp=""
-    
-    echo "✅ GPG 키가 keyring에 로드됨"
-  fi
-  
-  # 6. GPG 서명키 설정 (동적 파일 사용)
-  if [[ -n "${GIT_SIGNING_KEY:-}" ]]; then
-    touch "$HOME/.gitconfig_env"
-    git config -f "$HOME/.gitconfig_env" user.signingkey "$GIT_SIGNING_KEY"
-    git config -f "$HOME/.gitconfig_env" commit.gpgsign true
-    echo "✅ GPG 서명키 설정됨: $GIT_SIGNING_KEY"
-
-    # 7. GPG 에이전트 설정 리로드 및 캐시 웜업 (비밀번호 즉시 입력 유도)
-    # 설정을 확실히 적용하기 위해 에이전트 리로드
-    gpg-connect-agent reloadagent /bye >/dev/null 2>&1
-    
-    echo "🔏 GPG 비밀번호 캐싱을 위해 서명을 시도합니다 (8시간 유지)..."
-    # 더미 데이터 서명을 통해 비밀번호 프롬프트 강제 호출
-    echo "gpg-auth-start" | gpg --clearsign --local-user "$GIT_SIGNING_KEY" > /dev/null 2>&1
+    # GPG import (stdin 사용)
+    infisical secrets get GPG_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain | gpg --batch --import 2>/dev/null
     
     if [ $? -eq 0 ]; then
-        echo "✅ GPG 비밀번호가 캐시되었습니다."
+        # 6. GPG 서명키 설정 (동적 파일 사용)
+        if [[ -n "${GIT_SIGNING_KEY:-}" ]]; then
+            touch "$HOME/.gitconfig_env"
+            git config -f "$HOME/.gitconfig_env" user.signingkey "$GIT_SIGNING_KEY"
+            git config -f "$HOME/.gitconfig_env" commit.gpgsign true
+            echo "✅ GPG 서명키 설정됨: $GIT_SIGNING_KEY"
+
+            # 7. GPG 에이전트 설정 리로드 및 캐시 웜업
+            gpg-connect-agent reloadagent /bye >/dev/null 2>&1
+            
+            echo "🔏 GPG 비밀번호 캐싱을 위해 서명을 시도합니다 (8시간 유지)..."
+            echo "gpg-auth-start" | gpg --clearsign --local-user "$GIT_SIGNING_KEY" > /dev/null 2>&1
+            
+            if [ $? -eq 0 ]; then
+                echo "✅ GPG 비밀번호가 캐시되었습니다."
+            else
+                echo "⚠️  GPG 서명 실패 (비밀번호 입력을 취소했거나 오류 발생)"
+            fi
+        fi
     else
-        echo "⚠️  GPG 서명 실패 (비밀번호 입력을 취소했거나 오류 발생)"
+      echo "⚠️  GPG 키 import 실패"
     fi
   fi
   
@@ -215,26 +198,22 @@ auth-stop() {
   # 2. ssh-agent에서 모든 키 제거
   ssh-add -D 2>/dev/null || true
   
-  # 3. 임시 키 파일 삭제 (mktemp 사용으로 대부분 자동 정리됨)
-  # Legacy cleanup for any remaining files
-  rm -f /tmp/.ssh_key_* /tmp/.gpg_key_* 2>/dev/null || true
-  
-  # 4. GPG 개인키 삭제 (keyring에서 제거)
+  # 3. GPG 개인키 삭제 (keyring에서 제거)
   if [[ -n "${GIT_SIGNING_KEY:-}" ]]; then
-    # --batch --yes로 확인 없이 삭제
     gpg --batch --yes --delete-secret-keys "$GIT_SIGNING_KEY" 2>/dev/null || true
     echo "✅ GPG 개인키 삭제됨"
   fi
   
-  # 5. Git 서명 설정 해제 (동적 파일 정리)
+  # 4. Git 서명 설정 해제
   if [[ -f "$HOME/.gitconfig_env" ]]; then
     git config -f "$HOME/.gitconfig_env" --unset user.signingkey 2>/dev/null || true
     git config -f "$HOME/.gitconfig_env" --unset commit.gpgsign 2>/dev/null || true
-    # 파일이 비었으면 삭제하는 것도 좋으나 유지해도 무방
   fi
   
-  # 6. 환경변수 unset
-  unset GITHUB_TOKEN GIT_SIGNING_KEY SSH_PRIVATE_KEY GPG_PRIVATE_KEY 2>/dev/null || true
+  # 5. 환경변수 unset
+  unset GITHUB_TOKEN GIT_SIGNING_KEY
+  # PRIVATE_KEY 환경변수는 더 이상 로드되지 않지만 혹시 남아있을 경우를 대비해 unset
+  unset SSH_PRIVATE_KEY GPG_PRIVATE_KEY
   
   echo "✅ 모든 인증 정보 삭제됨"
 }
