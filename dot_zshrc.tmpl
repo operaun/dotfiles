@@ -174,6 +174,20 @@ auth-start() {
     git config -f "$HOME/.gitconfig_env" user.signingkey "$GIT_SIGNING_KEY"
     git config -f "$HOME/.gitconfig_env" commit.gpgsign true
     echo "✅ GPG 서명키 설정됨: $GIT_SIGNING_KEY"
+
+    # 7. GPG 에이전트 설정 리로드 및 캐시 웜업 (비밀번호 즉시 입력 유도)
+    # 설정을 확실히 적용하기 위해 에이전트 리로드
+    gpg-connect-agent reloadagent /bye >/dev/null 2>&1
+    
+    echo "🔏 GPG 비밀번호 캐싱을 위해 서명을 시도합니다 (8시간 유지)..."
+    # 더미 데이터 서명을 통해 비밀번호 프롬프트 강제 호출
+    echo "gpg-auth-start" | gpg --clearsign --local-user "$GIT_SIGNING_KEY" > /dev/null 2>&1
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ GPG 비밀번호가 캐시되었습니다."
+    else
+        echo "⚠️  GPG 서명 실패 (비밀번호 입력을 취소했거나 오류 발생)"
+    fi
   fi
   
   echo "✅ 인증 완료 (8시간 유효)"
