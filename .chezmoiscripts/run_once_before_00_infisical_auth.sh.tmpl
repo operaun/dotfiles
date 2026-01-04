@@ -4,8 +4,13 @@ set -euo pipefail
 {{ if and (eq .chezmoi.os "darwin") .isPersonal -}}
 # Infisical CLI 설치 확인 (Personal 전용)
 if ! command -v infisical &>/dev/null; then
-  echo "⚠️  Infisical CLI가 없습니다. Homebrew로 설치됩니다."
-  exit 0
+  echo "🔐 Infisical CLI 설치 중..."
+  brew install infisical/get-cli/infisical
+fi
+
+if ! command -v jq &>/dev/null; then
+  echo "🔧 jq 설치 중..."
+  brew install jq
 fi
 
 # 로그인 상태 확인

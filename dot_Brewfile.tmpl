@@ -1,6 +1,8 @@
 # Taps
 tap "homebrew/bundle"
+{{ if .isPersonal -}}
 tap "infisical/get-cli"
+{{- end }}
 
 # CLI Tools (기존)
 brew "bat"
@@ -19,12 +21,16 @@ brew "python@3.13"
 brew "tree"
 brew "uv"
 brew "wget"
+{{ if .isPersonal -}}
 brew "infisical/get-cli/infisical"
+{{- end }}
 
 # CLI Tools (추가 - 모던 대체 도구)
 brew "starship"     # 모던 쉘 프롬프트
 brew "zoxide"       # 스마트 cd
-brew "jq"           # JSON 처리
+{{ if .isPersonal -}}
+brew "jq"           # JSON 처리 (Infisical 파싱용)
+{{- end }}
 brew "fd"           # find 대체
 brew "ripgrep"      # grep 대체
 brew "eza"          # ls 대체 (exa 후속)
