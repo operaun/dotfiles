@@ -1,5 +1,6 @@
 # Taps
 tap "homebrew/bundle"
+tap "steipete/tap"
 {{ if .isPersonal -}}
 tap "infisical/get-cli"
 {{- end }}
@@ -41,6 +42,10 @@ brew "httpie"       # curl 대체
 # Neovim
 brew "neovim"
 
+# Infrastructure & DevOps
+brew "pulumi"
+brew "tmux"
+
 # Fonts (Nerd Fonts for terminal/Starship)
 cask "font-jetbrains-mono-nerd-font"
 
@@ -62,4 +67,8 @@ cask "raycast"
 cask "rectangle"
 cask "shottr"
 cask "slack"
+cask "steipete/tap/codexbar"
 cask "warp"
+
+# Utilities
+cask "appcleaner"
