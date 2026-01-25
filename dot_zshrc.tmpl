@@ -104,7 +104,7 @@ alias lg="lazygit"
 # 시크릿 및 키 관리 (auth-start / auth-stop) - Personal 전용
 # -----------------------------------------------------------------------------
 SECRETS_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/secrets.env"
-SECRETS_TTL=28800  # 8시간 (초)
+SECRETS_TTL=43200  # 12시간 (초)
 
 auth-start() {
   # Infisical CLI 설치 확인
@@ -144,7 +144,7 @@ auth-start() {
     infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain | ssh-add -t $SECRETS_TTL - 2>/dev/null
     
     if [ $? -eq 0 ]; then
-        echo "✅ SSH 키가 ssh-agent에 로드됨 (8시간 유효)"
+        echo "✅ SSH 키가 ssh-agent에 로드됨 (12시간 유효)"
     else
         echo "⚠️  SSH 키 로드 실패"
     fi
@@ -168,7 +168,7 @@ auth-start() {
             # 7. GPG 에이전트 설정 리로드 및 캐시 웜업
             gpg-connect-agent reloadagent /bye >/dev/null 2>&1
             
-            echo "🔏 GPG 비밀번호 캐싱을 위해 서명을 시도합니다 (8시간 유지)..."
+            echo "🔏 GPG 비밀번호 캐싱을 위해 서명을 시도합니다 (12시간 유지)..."
             echo "gpg-auth-start" | gpg --clearsign --local-user "$GIT_SIGNING_KEY" > /dev/null 2>&1
             
             if [ $? -eq 0 ]; then
@@ -182,7 +182,7 @@ auth-start() {
     fi
   fi
   
-  echo "✅ 인증 완료 (8시간 유효)"
+  echo "✅ 인증 완료 (12시간 유효)"
 }
 
 auth-stop() {
@@ -223,7 +223,7 @@ if [[ -f "$SECRETS_CACHE" ]]; then
     source "$SECRETS_CACHE"
   else
     rm -f "$SECRETS_CACHE"
-    echo "⏰ 시크릿 캐시 만료 (8시간 경과) - auth-start로 재인증 필요"
+    echo "⏰ 시크릿 캐시 만료 (12시간 경과) - auth-start로 재인증 필요"
   fi
 fi
 {{- end }}

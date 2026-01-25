@@ -27,7 +27,7 @@
 SSH/GPG 키를 Infisical에서 동적 로드:
 
 ```bash
-auth-start   # Infisical에서 SSH/GPG 키 로드 (8시간 캐싱)
+auth-start   # Infisical에서 SSH/GPG 키 로드 (12시간 캐싱)
 auth-stop    # 모든 인증 정보 삭제
 ```
 
