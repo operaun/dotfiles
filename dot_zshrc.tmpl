@@ -106,6 +106,20 @@ alias lg="lazygit"
 SECRETS_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/secrets.env"
 SECRETS_FOREVER_MARKER="${XDG_CACHE_HOME:-$HOME/.cache}/.secrets_forever"
 SECRETS_TTL=43200  # 12시간 (초)
+SECRETS_FOREVER_TTL=315360000  # 10년 (초) - 사실상 무기한
+GPG_AGENT_CONF="$HOME/.gnupg/gpg-agent.conf"
+
+# GPG agent TTL 설정 함수
+_set_gpg_agent_ttl() {
+  local ttl=$1
+  if [[ -f "$GPG_AGENT_CONF" ]]; then
+    # macOS sed 호환 문법 사용
+    sed -i '' "s/^default-cache-ttl.*/default-cache-ttl $ttl/" "$GPG_AGENT_CONF"
+    sed -i '' "s/^max-cache-ttl.*/max-cache-ttl $ttl/" "$GPG_AGENT_CONF"
+    # GPG 에이전트 리로드
+    gpg-connect-agent reloadagent /bye >/dev/null 2>&1
+  fi
+}
 
 auth-start() {
   local forever_mode=false
@@ -218,12 +232,14 @@ auth-start() {
     fi
   fi
   
-  # Forever 모드 마커 파일 관리
+  # Forever 모드 마커 파일 관리 및 GPG TTL 설정
   if [[ "$forever_mode" == true ]]; then
     touch "$SECRETS_FOREVER_MARKER"
+    _set_gpg_agent_ttl $SECRETS_FOREVER_TTL
     echo "✅ 인증 완료 (영구 유효 - auth-stop으로 해제)"
   else
     rm -f "$SECRETS_FOREVER_MARKER"
+    _set_gpg_agent_ttl $SECRETS_TTL
     echo "✅ 인증 완료 (12시간 유효)"
   fi
 }
@@ -234,6 +250,11 @@ auth-stop() {
   # 1. 시크릿 캐시 및 forever 마커 삭제
   if [[ -f "$SECRETS_CACHE" ]]; then
     rm -f "$SECRETS_CACHE"
+  fi
+  
+  # Forever 모드였다면 GPG TTL을 12시간으로 복원
+  if [[ -f "$SECRETS_FOREVER_MARKER" ]]; then
+    _set_gpg_agent_ttl $SECRETS_TTL
   fi
   rm -f "$SECRETS_FOREVER_MARKER"
   
