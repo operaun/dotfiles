@@ -219,7 +219,14 @@ auth-start() {
             git config -f "$HOME/.gitconfig_env" commit.gpgsign true
             echo "✅ GPG 서명키 설정됨: $GIT_SIGNING_KEY"
 
-            # 7. GPG 에이전트 설정 리로드 및 캐시 웜업
+            # 7. GPG TTL 설정 (캐싱 전에 먼저 설정해야 새 TTL이 적용됨)
+            if [[ "$forever_mode" == true ]]; then
+              _set_gpg_agent_ttl $SECRETS_FOREVER_TTL
+            else
+              _set_gpg_agent_ttl $SECRETS_TTL
+            fi
+            
+            # 8. GPG 에이전트 설정 리로드 및 캐시 웜업
             gpg-connect-agent reloadagent /bye >/dev/null 2>&1
             
             if [[ "$forever_mode" == true ]]; then
@@ -240,14 +247,12 @@ auth-start() {
     fi
   fi
   
-  # Forever 모드 마커 파일 관리 및 GPG TTL 설정
+  # Forever 모드 마커 파일 관리
   if [[ "$forever_mode" == true ]]; then
     touch "$SECRETS_FOREVER_MARKER"
-    _set_gpg_agent_ttl $SECRETS_FOREVER_TTL
     echo "✅ 인증 완료 (영구 유효 - auth-stop으로 해제)"
   else
     rm -f "$SECRETS_FOREVER_MARKER"
-    _set_gpg_agent_ttl $SECRETS_TTL
     echo "✅ 인증 완료 (12시간 유효)"
   fi
 }
