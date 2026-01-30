@@ -116,8 +116,9 @@ _set_gpg_agent_ttl() {
     # macOS sed 호환 문법 사용
     sed -i '' "s/^default-cache-ttl.*/default-cache-ttl $ttl/" "$GPG_AGENT_CONF"
     sed -i '' "s/^max-cache-ttl.*/max-cache-ttl $ttl/" "$GPG_AGENT_CONF"
-    # GPG 에이전트 리로드
-    gpg-connect-agent reloadagent /bye >/dev/null 2>&1
+    # GPG 에이전트 완전 재시작 (reloadagent는 기존 캐시 TTL을 변경하지 않음)
+    gpgconf --kill gpg-agent
+    gpg-connect-agent /bye >/dev/null 2>&1  # 새 agent 자동 시작
   fi
 }
 
