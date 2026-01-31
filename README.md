@@ -28,8 +28,9 @@
 SSH/GPG 키를 Infisical에서 동적 로드:
 
 ```bash
-auth-start   # Infisical에서 SSH/GPG 키 로드 (12시간 캐싱)
-auth-stop    # 모든 인증 정보 삭제
+auth-start          # Infisical에서 SSH/GPG 키 로드 (영구 캐싱)
+auth-start --temp   # 12시간만 유효한 임시 모드
+auth-stop           # 모든 인증 정보 삭제 + GPG agent 종료
 ```
 
 ### Infisical 시크릿 구성
@@ -120,9 +121,13 @@ chezmoi update   # GitHub에서 최신 dotfiles 가져와서 적용
 
 | 설정 | 기본값 | 변경값 | 설명 |
 |------|--------|--------|------|
-| default-cache-ttl | 600 | 43200 | 12시간 캐싱 |
-| max-cache-ttl | 7200 | 43200 | 최대 12시간 |
+| default-cache-ttl | 600 | 315360000 | 10년 (사실상 영구) |
+| max-cache-ttl | 7200 | 315360000 | 10년 (사실상 영구) |
+| default-cache-ttl-ssh | 1800 | 315360000 | SSH용 10년 캐싱 |
+| max-cache-ttl-ssh | 7200 | 315360000 | SSH용 10년 캐싱 |
 | pinentry-program | - | pinentry-mac | macOS 통합 |
+
+> 💡 `auth-stop` 실행 시 GPG agent가 종료되어 캐시된 패스프레이즈가 삭제됩니다.
 
 ## 📝 License
 

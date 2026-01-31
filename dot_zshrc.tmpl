@@ -109,39 +109,19 @@ SECRETS_TTL=43200  # 12시간 (초)
 SECRETS_FOREVER_TTL=315360000  # 10년 (초) - 사실상 무기한
 GPG_AGENT_CONF="$HOME/.gnupg/gpg-agent.conf"
 
-# GPG agent TTL 설정 함수
-_set_gpg_agent_ttl() {
-  local ttl=$1
-  if [[ -f "$GPG_AGENT_CONF" ]]; then
-    # 현재 설정된 TTL 확인
-    local current_ttl=$(grep "^default-cache-ttl" "$GPG_AGENT_CONF" | awk '{print $2}')
-    
-    # TTL이 변경될 때만 설정 업데이트 및 에이전트 재시작
-    if [[ "$current_ttl" != "$ttl" ]]; then
-      # macOS sed 호환 문법 사용
-      sed -i '' "s/^default-cache-ttl.*/default-cache-ttl $ttl/" "$GPG_AGENT_CONF"
-      sed -i '' "s/^max-cache-ttl.*/max-cache-ttl $ttl/" "$GPG_AGENT_CONF"
-      # GPG 에이전트 완전 재시작 (reloadagent는 기존 캐시 TTL을 변경하지 않음)
-      gpgconf --kill gpg-agent
-      gpg-connect-agent /bye >/dev/null 2>&1  # 새 agent 자동 시작
-      echo "🔧 GPG 캐시 TTL 변경됨: $current_ttl → $ttl"
-    fi
-  fi
-}
-
 auth-start() {
-  local forever_mode=false
+  local temp_mode=false
   
   # 옵션 파싱
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --forever)
-        forever_mode=true
+      --temp)
+        temp_mode=true
         shift
         ;;
       *)
         echo "❌ 알 수 없는 옵션: $1"
-        echo "사용법: auth-start [--forever]"
+        echo "사용법: auth-start [--temp]"
         return 1
         ;;
     esac
@@ -153,10 +133,10 @@ auth-start() {
     return 1
   fi
 
-  if [[ "$forever_mode" == true ]]; then
-    echo "🔐 Infisical에서 인증 정보 로딩... (영구 모드)"
+  if [[ "$temp_mode" == true ]]; then
+    echo "🔐 Infisical에서 인증 정보 로딩... (12시간 임시 모드)"
   else
-    echo "🔐 Infisical에서 인증 정보 로딩..."
+    echo "🔐 Infisical에서 인증 정보 로딩... (영구 모드)"
   fi
   
   # 1. Infisical 로그인 확인
@@ -185,19 +165,19 @@ auth-start() {
   if infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" &>/dev/null; then
     echo "🔑 SSH 키 로딩 중..."
     
-    if [[ "$forever_mode" == true ]]; then
+    if [[ "$temp_mode" == true ]]; then
+      # 임시 모드: TTL 설정 (12시간)
+      infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain | ssh-add -t $SECRETS_TTL - 2>/dev/null
+    else
       # 영구 모드: TTL 없이 ssh-add
       infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain | ssh-add - 2>/dev/null
-    else
-      # 일반 모드: TTL 설정
-      infisical secrets get SSH_PRIVATE_KEY --projectId "{{ .infisicalProjectId }}" --env "{{ .infisicalEnv }}" --plain | ssh-add -t $SECRETS_TTL - 2>/dev/null
     fi
     
     if [ $? -eq 0 ]; then
-      if [[ "$forever_mode" == true ]]; then
-        echo "✅ SSH 키가 ssh-agent에 로드됨 (영구 유효)"
-      else
+      if [[ "$temp_mode" == true ]]; then
         echo "✅ SSH 키가 ssh-agent에 로드됨 (12시간 유효)"
+      else
+        echo "✅ SSH 키가 ssh-agent에 로드됨 (영구 유효)"
       fi
     else
         echo "⚠️  SSH 키 로드 실패"
@@ -219,20 +199,14 @@ auth-start() {
             git config -f "$HOME/.gitconfig_env" commit.gpgsign true
             echo "✅ GPG 서명키 설정됨: $GIT_SIGNING_KEY"
 
-            # 7. GPG TTL 설정 (캐싱 전에 먼저 설정해야 새 TTL이 적용됨)
-            if [[ "$forever_mode" == true ]]; then
-              _set_gpg_agent_ttl $SECRETS_FOREVER_TTL
-            else
-              _set_gpg_agent_ttl $SECRETS_TTL
-            fi
-            
-            # 8. GPG 에이전트 설정 리로드 및 캐시 웜업
+            # 7. GPG 에이전트 설정 리로드 및 캐시 웜업
+            # TTL은 gpg-agent.conf에서 영구(10년)로 관리됨 - chezmoi가 source of truth
             gpg-connect-agent reloadagent /bye >/dev/null 2>&1
             
-            if [[ "$forever_mode" == true ]]; then
-              echo "🔏 GPG 비밀번호 캐싱을 위해 서명을 시도합니다 (영구 유지)..."
-            else
+            if [[ "$temp_mode" == true ]]; then
               echo "🔏 GPG 비밀번호 캐싱을 위해 서명을 시도합니다 (12시간 유지)..."
+            else
+              echo "🔏 GPG 비밀번호 캐싱을 위해 서명을 시도합니다 (영구 유지)..."
             fi
             echo "gpg-auth-start" | gpg --clearsign --local-user "$GIT_SIGNING_KEY" > /dev/null 2>&1
             
@@ -248,12 +222,12 @@ auth-start() {
   fi
   
   # Forever 모드 마커 파일 관리
-  if [[ "$forever_mode" == true ]]; then
-    touch "$SECRETS_FOREVER_MARKER"
-    echo "✅ 인증 완료 (영구 유효 - auth-stop으로 해제)"
-  else
+  if [[ "$temp_mode" == true ]]; then
     rm -f "$SECRETS_FOREVER_MARKER"
     echo "✅ 인증 완료 (12시간 유효)"
+  else
+    touch "$SECRETS_FOREVER_MARKER"
+    echo "✅ 인증 완료 (영구 유효 - auth-stop으로 해제)"
   fi
 }
 
@@ -261,24 +235,18 @@ auth-stop() {
   echo "🔒 인증 정보 정리 중..."
   
   # 1. 시크릿 캐시 및 forever 마커 삭제
-  if [[ -f "$SECRETS_CACHE" ]]; then
-    rm -f "$SECRETS_CACHE"
-  fi
-  
-  # Forever 모드였다면 GPG TTL을 12시간으로 복원
-  if [[ -f "$SECRETS_FOREVER_MARKER" ]]; then
-    _set_gpg_agent_ttl $SECRETS_TTL
-  fi
-  rm -f "$SECRETS_FOREVER_MARKER"
+  rm -f "$SECRETS_CACHE" "$SECRETS_FOREVER_MARKER"
   
   # 2. ssh-agent에서 모든 키 제거
   ssh-add -D 2>/dev/null || true
   
-  # 3. GPG 개인키 삭제 (keyring에서 제거)
+  # 3. GPG 개인키 삭제 및 agent kill (캐시된 패스프레이즈 완전 삭제)
   if [[ -n "${GIT_SIGNING_KEY:-}" ]]; then
     gpg --batch --yes --delete-secret-keys "$GIT_SIGNING_KEY" 2>/dev/null || true
     echo "✅ GPG 개인키 삭제됨"
   fi
+  gpgconf --kill gpg-agent 2>/dev/null || true
+  echo "✅ GPG agent 종료됨 (캐시된 패스프레이즈 삭제)"
   
   # 4. Git 서명 설정 해제
   if [[ -f "$HOME/.gitconfig_env" ]]; then
