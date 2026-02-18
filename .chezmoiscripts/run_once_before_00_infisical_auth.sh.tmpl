@@ -1,26 +1,41 @@
 #!/bin/bash
 set -euo pipefail
 
-{{ if and (eq .chezmoi.os "darwin") .isPersonal -}}
-# Infisical CLI 설치 확인 (Personal 전용)
+{{ if and (eq .chezmoi.os "darwin") .isPersonal .isFullSetup -}}
 if ! command -v infisical &>/dev/null; then
   echo "🔐 Infisical CLI 설치 중..."
-  brew install infisical/get-cli/infisical
+  if ! command -v brew &>/dev/null; then
+    echo "⚠️  brew가 없어 Infisical 설치를 건너뜁니다."
+    exit 0
+  fi
+
+  if ! brew install infisical/get-cli/infisical; then
+    echo "⚠️  Infisical 설치 실패. 인증 단계를 건너뜁니다."
+    exit 0
+  fi
 fi
 
 if ! command -v jq &>/dev/null; then
   echo "🔧 jq 설치 중..."
-  brew install jq
+  if ! command -v brew &>/dev/null; then
+    echo "⚠️  brew가 없어 jq 설치를 건너뜁니다."
+    exit 0
+  fi
+
+  if ! brew install jq; then
+    echo "⚠️  jq 설치 실패. 인증 단계를 건너뜁니다."
+    exit 0
+  fi
 fi
 
-# 로그인 상태 확인
 if ! infisical whoami &>/dev/null; then
   echo "🔐 Infisical 로그인이 필요합니다..."
   infisical login
 fi
 
 echo "✅ Infisical 인증 완료"
+{{- else if and (eq .chezmoi.os "darwin") .isPersonal .isMinimalSetup }}
+echo "ℹ️  Minimal 모드: Infisical 인증 스킵"
 {{- else if eq .chezmoi.os "darwin" }}
-# Work 프로필 - Infisical 인증 스킵
 echo "ℹ️  Work 프로필: Infisical 인증 스킵"
 {{- end }}

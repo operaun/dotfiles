@@ -1,6 +1,7 @@
 # Taps
 tap "homebrew/bundle"
 tap "steipete/tap"
+tap "lbjlaq/antigravity-manager"
 {{ if .isPersonal -}}
 tap "infisical/get-cli"
 {{- end }}
@@ -8,9 +9,9 @@ tap "infisical/get-cli"
 # CLI Tools (기존)
 brew "bat"
 brew "chezmoi"
-brew "codex"
 brew "docker"
 brew "fzf"
+brew "gemini-cli"
 brew "gh"
 brew "gnupg"
 brew "go"
@@ -52,8 +53,11 @@ cask "font-jetbrains-mono-nerd-font"
 # Casks
 cask "adguard"
 cask "antigravity"
+cask "antigravity-tools"
 cask "arc"
 cask "cheatsheet"
+cask "codex"
+cask "gcloud-cli"
 cask "google-chrome"
 cask "iina"
 cask "karabiner-elements"
@@ -68,6 +72,7 @@ cask "rectangle"
 cask "shottr"
 cask "slack"
 cask "steipete/tap/codexbar"
+cask "tailscale-app"
 cask "warp"
 
 # Utilities

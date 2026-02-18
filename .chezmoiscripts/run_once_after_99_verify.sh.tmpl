@@ -6,8 +6,6 @@ echo "🔍 설치 검증 중..."
 echo ""
 
 # =============================================================================
-# Homebrew 설치 확인
-# =============================================================================
 missing_tools=()
 
 check_command() {
@@ -19,27 +17,32 @@ check_command() {
   fi
 }
 
-# CLI 도구 검증
 echo "📦 CLI 도구:"
-check_command "starship"
-check_command "zoxide"
-check_command "eza"
-check_command "bat"
-check_command "fd"
-check_command "rg"
-check_command "fzf"
-check_command "lazygit"
-check_command "tldr"
-check_command "jq"
-check_command "nvim"
+if [[ "{{ .setupMode }}" == "minimal" ]]; then
+  check_command "chezmoi"
+  check_command "git"
+  check_command "zsh"
+  echo "ℹ️  Minimal 모드: 패키지 도구 검증은 생략합니다."
+else
+  check_command "starship"
+  check_command "zoxide"
+  check_command "eza"
+  check_command "bat"
+  check_command "fd"
+  check_command "rg"
+  check_command "fzf"
+  check_command "lazygit"
+  check_command "tldr"
+  check_command "jq"
+  check_command "nvim"
 
-{{ if .isPersonal -}}
-# Personal 전용 도구
-echo ""
-echo "🔐 Personal 전용:"
-check_command "infisical"
-check_command "gpg"
-{{- end }}
+  {{ if .isPersonal -}}
+  echo ""
+  echo "🔐 Personal 전용:"
+  check_command "infisical"
+  check_command "gpg"
+  {{- end }}
+fi
 
 # =============================================================================
 # 설정 파일 검증
@@ -73,6 +76,10 @@ if [[ ${#missing_tools[@]} -eq 0 ]]; then
   echo "🎉 모든 검증 통과!"
 else
   echo "⚠️  누락된 도구: ${missing_tools[*]}"
-  echo "   'brew bundle --file=~/.Brewfile' 실행 권장"
+  if [[ "{{ .setupMode }}" == "full" ]]; then
+    echo "   'brew bundle --file=~/.Brewfile' 실행 권장"
+  else
+    echo "   필요 시 full 모드로 재실행하거나, 개별 도구를 수동 설치하세요."
+  fi
 fi
 {{- end }}

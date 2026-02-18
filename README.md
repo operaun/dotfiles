@@ -8,6 +8,12 @@
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/operaun/dotfiles/main/bootstrap.sh)"
 ```
 
+권한 제한(관리자 권한 없음) 환경에서는:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/operaun/dotfiles/main/bootstrap.sh)" -- --minimal
+```
+
 설치 중 선택:
 - **Profile**: `personal` (개인) / `work` (업무)
 - **Git 정보**: 이름, 이메일
@@ -22,6 +28,13 @@
 | **Tmux** | 터미널 멀티플렉서 설정 |
 | **Git** | 전역 설정, alias |
 | **macOS** | 시스템 설정 (Finder, Dock, 키보드 등) |
+
+## ⚙️ 설치 모드
+
+| 모드 | 설명 | 권장 환경 |
+|------|------|-----------|
+| `full` (기본) | Homebrew 패키지/GUI 앱 포함 전체 설정 | 개인 맥북, 관리자 권한 사용 가능 환경 |
+| `minimal` | dotfiles 핵심 설정만 적용, 패키지 설치 스킵 | 회사/공용 계정, 관리자 권한 제한 환경 |
 
 ## 🔐 시크릿 관리 (Personal 전용)
 

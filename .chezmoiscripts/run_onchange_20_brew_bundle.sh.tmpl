@@ -5,17 +5,37 @@ set -euo pipefail
 # {{ include "dot_Brewfile.tmpl" | sha256sum }}
 
 {{ if eq .chezmoi.os "darwin" -}}
-echo "🍺 Homebrew 패키지 설치 중..."
-
-# Homebrew 설치 확인
-if ! command -v brew &>/dev/null; then
-  echo "Homebrew 설치 중..."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  eval "$(/opt/homebrew/bin/brew shellenv)"
+if [[ "{{ .setupMode }}" == "minimal" ]]; then
+  echo "ℹ️  Minimal 모드: Homebrew 패키지 설치를 건너뜁니다."
+  exit 0
 fi
 
-# brew bundle 실행
-brew bundle --file="{{ .chezmoi.homeDir }}/.Brewfile"
+echo "🍺 Homebrew 패키지 설치 중..."
+
+if ! command -v brew &>/dev/null; then
+  echo "Homebrew 설치 중..."
+  if ! /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
+    echo "⚠️  Homebrew 설치 실패. 패키지 설치를 건너뜁니다."
+    exit 0
+  fi
+fi
+
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+if ! command -v brew &>/dev/null; then
+  echo "⚠️  brew 명령을 찾을 수 없습니다. 패키지 설치를 건너뜁니다."
+  exit 0
+fi
+
+if brew bundle --file="{{ .chezmoi.homeDir }}/.Brewfile"; then
+  echo "✅ Homebrew 패키지 설치 완료"
+else
+  echo "⚠️  Homebrew 패키지 일부 설치 실패. 계속 진행합니다."
+fi
 
 echo "✅ Homebrew 패키지 설치 완료"
 {{- end }}

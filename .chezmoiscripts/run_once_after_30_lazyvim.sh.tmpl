@@ -2,6 +2,11 @@
 set -euo pipefail
 
 {{ if eq .chezmoi.os "darwin" -}}
+if [[ "{{ .setupMode }}" == "minimal" ]]; then
+  echo "ℹ️  Minimal 모드: LazyVim 설치 스킵"
+  exit 0
+fi
+
 # LazyVim 설치 (설치되어 있지 않은 경우에만)
 if [[ ! -d "$HOME/.config/nvim" ]]; then
   echo "📦 LazyVim 설치 중..."

@@ -1,13 +1,17 @@
 {{- $name := promptStringOnce . "name" "Git user name" -}}
 {{- $email := promptStringOnce . "email" "Git email address" -}}
 {{- $profile := promptChoiceOnce . "profile" "Profile type" (list "personal" "work") -}}
+{{- $setupMode := promptChoiceOnce . "setupMode" "Setup mode" (list "full" "minimal") -}}
 
 data:
   name: {{ $name | quote }}
   email: {{ $email | quote }}
   profile: {{ $profile | quote }}
+  setupMode: {{ $setupMode | quote }}
   isPersonal: {{ eq $profile "personal" }}
   isWork: {{ eq $profile "work" }}
+  isFullSetup: {{ eq $setupMode "full" }}
+  isMinimalSetup: {{ eq $setupMode "minimal" }}
   # Infisical 설정 (personal 전용)
   infisicalProjectId: "d7915e0f-395e-4292-b0e3-9966c2efb2a0"
   infisicalEnv: "dev"
